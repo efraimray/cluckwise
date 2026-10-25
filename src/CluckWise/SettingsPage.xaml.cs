@@ -122,9 +122,11 @@ public partial class SettingsPage : UserControl
         var choice = ZoneList.SelectedItem as ZoneChoice ?? (ZoneList.Items.Count == 1 ? ZoneList.Items[0] as ZoneChoice : null);
         if (choice == null)
         {
-            MessageBox.Show(Window.GetWindow(this), "Search for a city, then click it in the list.", "CluckWise");
+            ClockError.Text = "Search for a city, then click it in the list.";
+            ClockError.Visibility = Visibility.Visible;
             return;
         }
+        ClockError.Visibility = Visibility.Collapsed;
         var label = ClockLabelBox.Text.Trim();
         var clock = new WorldClock { TimeZoneId = choice.ZoneId, Label = label.Length > 0 ? label : choice.Label };
         clock.Refresh(DateTime.Now);

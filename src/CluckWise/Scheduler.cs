@@ -44,9 +44,7 @@ public class Scheduler
                 continue;
             }
 
-            if (!alarm.Enabled) continue;
-            var due = NextOccurrence(alarm, _lastCheck);
-            if (due is { } d && d <= now && now - d <= CatchUpWindow && alarm.LastRung != d)
+            if (DueNow(alarm, _lastCheck, now) is { } d)
             {
                 alarm.LastRung = d;
                 if (alarm.Repeat == RepeatMode.Once) alarm.Enabled = false;
@@ -97,6 +95,17 @@ public class Scheduler
         _lastCheck = now;
         foreach (var alarm in _data.Alarms) alarm.Countdown = CountdownText(alarm, now);
         Ticked?.Invoke();
+    }
+
+    /// <summary>
+    /// If the alarm should ring now (it came due since the last check, isn't more than
+    /// 30 minutes late, and hasn't rung for that time yet), returns the time it was due.
+    /// </summary>
+    public static DateTime? DueNow(Alarm alarm, DateTime lastCheck, DateTime now)
+    {
+        if (!alarm.Enabled || alarm.IsNew) return null;
+        var due = NextOccurrence(alarm, lastCheck);
+        return due is { } d && d <= now && now - d <= CatchUpWindow && alarm.LastRung != d ? d : null;
     }
 
     /// <summary>The first time strictly after <paramref name="after"/> that the alarm should ring.</summary>

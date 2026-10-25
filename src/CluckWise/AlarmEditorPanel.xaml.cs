@@ -154,6 +154,7 @@ public partial class AlarmEditorPanel : UserControl
             _ => "",
         };
 
+        SummaryText.SetResourceReference(TextBlock.ForegroundProperty, "Muted");
         var next = Scheduler.NextOccurrence(_edit, DateTime.Now);
         SummaryText.Text = next is { } n
             ? $"Rings {n:dddd d MMM} at {TimeFormat.Time(n)} · in {Scheduler.Humanize(n - DateTime.Now)}"
@@ -182,13 +183,47 @@ public partial class AlarmEditorPanel : UserControl
 
     private void AddWebsite_Click(object sender, RoutedEventArgs e)
     {
-        var text = Microsoft.VisualBasic.Interaction.InputBox("Web address to open when the alarm rings:", "Open a website", "https://");
-        if (string.IsNullOrWhiteSpace(text) || text.Trim() == "https://") return;
-        var url = ActionRunner.NormalizeUrl(text);
-        if (url == null) { MessageBox.Show(Window.GetWindow(this), "That doesn't look like a web address.", "CluckWise"); return; }
+        WebsiteRow.Visibility = Visibility.Visible;
+        WebsiteBox.Clear();
+        HideMessage();
+        WebsiteBox.Focus();
+    }
+
+    private void WebsiteAdd_Click(object sender, RoutedEventArgs e)
+    {
+        var url = ActionRunner.NormalizeUrl(WebsiteBox.Text);
+        if (url == null) { ShowMessage("That doesn't look like a web address. Try something like news.google.com.", error: true); return; }
         _actions.Add(new AlarmAction { Kind = ActionKind.OpenWebsite, Target = url });
         RefreshActions();
+        WebsiteRow.Visibility = Visibility.Collapsed;
+        HideMessage();
     }
+
+    private void WebsiteCancel_Click(object sender, RoutedEventArgs e)
+    {
+        WebsiteRow.Visibility = Visibility.Collapsed;
+        HideMessage();
+    }
+
+    private void WebsiteBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key == System.Windows.Input.Key.Enter) { WebsiteAdd_Click(sender, e); e.Handled = true; }
+        else if (e.Key == System.Windows.Input.Key.Escape) { WebsiteCancel_Click(sender, e); e.Handled = true; }
+    }
+
+    private void WebsiteBox_TextChanged(object sender, TextChangedEventArgs e) =>
+        WebsiteHint.Visibility = WebsiteBox.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    /// <summary>A short message under the actions: red for problems, muted for hints.</summary>
+    private void ShowMessage(string text, bool error)
+    {
+        ActionMessage.Text = text;
+        if (error) ActionMessage.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xE5, 0x48, 0x4D));
+        else ActionMessage.SetResourceReference(TextBlock.ForegroundProperty, "Muted");
+        ActionMessage.Visibility = Visibility.Visible;
+    }
+
+    private void HideMessage() => ActionMessage.Visibility = Visibility.Collapsed;
 
     private void AddProgram_Click(object sender, RoutedEventArgs e)
     {
@@ -228,9 +263,9 @@ public partial class AlarmEditorPanel : UserControl
 
     private void TestAction_Click(object sender, RoutedEventArgs e)
     {
-        if (ActionsList.SelectedItem is not AlarmAction a) { MessageBox.Show(Window.GetWindow(this), "Select an action to test.", "CluckWise"); return; }
+        if (ActionsList.SelectedItem is not AlarmAction a) { ShowMessage("Click an action in the list first, then Test.", error: false); return; }
         var error = ActionRunner.Run(a);
-        if (error != null) MessageBox.Show(Window.GetWindow(this), error, "CluckWise");
+        if (error != null) ShowMessage(error, error: true); else HideMessage();
     }
 
     private void RemoveAction_Click(object sender, RoutedEventArgs e)
@@ -260,7 +295,9 @@ public partial class AlarmEditorPanel : UserControl
         UpdateState();
         if (_edit.Repeat == RepeatMode.Weekly && !_edit.Days.Any(d => d))
         {
-            MessageBox.Show(Window.GetWindow(this), "Pick at least one day, or choose Once or Every day.", "CluckWise");
+            SummaryText.Text = "Pick at least one day, or choose Once or Every day.";
+            SummaryText.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xE5, 0x48, 0x4D));
+            DaysPanel.Focus();
             return;
         }
         _edit.Label = string.IsNullOrWhiteSpace(LabelBox.Text) ? "Alarm" : LabelBox.Text.Trim();

@@ -40,6 +40,14 @@ dotnet run
 
 Or open `src/CluckWise/CluckWise.csproj` in Visual Studio 2022 (with the ".NET desktop development" workload) and press F5.
 
+## Tests
+
+Automatic tests cover the alarm logic: monthly alarms on the 31st, leap days, weekends, missed alarms after sleep, no double rings, snooze, the morning streak and birthdays. GitHub runs them on Windows after every push.
+
+```powershell
+dotnet test tests/CluckWise.Tests
+```
+
 ## Where data is stored
 
 Alarms, timers and settings are saved to `%AppData%\CluckWise\data.json`. Settings → *Open data folder* opens it.

@@ -26,6 +26,7 @@
           <TextBlock DockPanel.Dock="Right" Text="min" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{DynamicResource Muted}"/>
           <TextBox x:Name="LabelBox" Style="{StaticResource Field}" Text="Timer" ToolTip="Name, e.g. Tea or Laundry"/>
         </DockPanel>
+        <TextBlock x:Name="TimerError" Foreground="#E5484D" FontSize="13" Margin="2,8,0,0" Visibility="Collapsed"/>
       </StackPanel>
     </Border>
 

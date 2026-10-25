@@ -94,10 +94,11 @@ public partial class App : Application
     private void AskAboutStartup()
     {
         Data.AskedAboutStartup = true;
-        var answer = MessageBox.Show(
-            "Start CluckWise when you sign in to Windows?\n\nIt opens quietly in the tray so your alarms still ring after a restart. You can change this any time in the sidebar.",
-            "CluckWise", MessageBoxButton.YesNo, MessageBoxImage.Question);
-        SetStartWithWindows(answer == MessageBoxResult.Yes);
+        var yes = CluckDialog.Ask(
+            "Start CluckWise with Windows?",
+            "It opens quietly in the tray when you sign in, so your alarms still ring after a restart. You can change this any time in Settings.",
+            "Yes, start with Windows", "Not now");
+        SetStartWithWindows(yes);
         _main?.RefreshStartupSwitch();
     }
 

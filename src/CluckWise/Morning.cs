@@ -32,10 +32,10 @@ public static class Morning
     }
 
     /// <summary>Called when a morning alarm is dismissed.</summary>
-    public static void RecordDismiss(AppData data, Alarm alarm)
+    public static void RecordDismiss(AppData data, Alarm alarm, DateTime? onDay = null)
     {
         if (!IsMorningAlarm(alarm)) return;
-        var today = DateTime.Today;
+        var today = (onDay ?? DateTime.Today).Date;
         if (alarm.SnoozedThisRing)
         {
             // Snoozing breaks the streak, but only once per morning.

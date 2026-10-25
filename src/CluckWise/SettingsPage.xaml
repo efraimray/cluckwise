@@ -66,6 +66,7 @@
             <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}" Content="Add city" Margin="10,0,0,0" Click="AddClock_Click"/>
             <TextBox x:Name="ClockLabelBox" Style="{StaticResource Field}" ToolTip="Name to show (optional), e.g. Mum in London"/>
           </DockPanel>
+          <TextBlock x:Name="ClockError" Foreground="#E5484D" FontSize="13" Margin="2,0,0,10" Visibility="Collapsed"/>
           <ItemsControl x:Name="ClockList">
             <ItemsControl.ItemTemplate>
               <DataTemplate>

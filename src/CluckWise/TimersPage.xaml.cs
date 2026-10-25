@@ -19,7 +19,8 @@ public partial class TimersPage : UserControl
 
     private void Add(string label, int seconds)
     {
-        if (seconds <= 0) { MessageBox.Show(Window.GetWindow(this), "Set a time longer than zero.", "CluckWise"); return; }
+        if (seconds <= 0) { TimerError.Text = "Set a time longer than zero."; TimerError.Visibility = Visibility.Visible; return; }
+        TimerError.Visibility = Visibility.Collapsed;
         var timer = new CountdownTimer { Label = label, DurationSeconds = seconds, RemainingSeconds = seconds };
         App.Current.Data.Timers.Add(timer);
         timer.Start();
