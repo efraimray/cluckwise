@@ -67,6 +67,7 @@ public partial class App : Application
         _main = new MainWindow();
         if (!e.Args.Contains("--minimized")) _main.Show();
         Scheduler.Start();
+        if (Data.ShowWidget) SetWidgetVisible(true);
 
         try { WindowsStartup.RefreshPath(); } catch { }
         if (!Data.AskedAboutStartup) Dispatcher.BeginInvoke(new Action(AskAboutStartup));
@@ -118,6 +119,31 @@ public partial class App : Application
 
     public void RefreshAlarmList() => _main?.RefreshList();
 
+    private FloatingWidget? _widget;
+    private Forms.ToolStripMenuItem? _widgetMenuItem;
+
+    public bool WidgetVisible => _widget != null;
+
+    /// <summary>Shows or hides the floating widget and remembers the choice.</summary>
+    public void SetWidgetVisible(bool show)
+    {
+        if (show && _widget == null)
+        {
+            _widget = new FloatingWidget();
+            _widget.Closed += (_, _) => _widget = null;
+            _widget.Show();
+        }
+        else if (!show && _widget != null)
+        {
+            _widget.Close();
+            _widget = null;
+        }
+        Data.ShowWidget = show;
+        if (_widgetMenuItem != null) _widgetMenuItem.Checked = show;
+        SaveData();
+        _main?.RefreshWidgetSwitch();
+    }
+
     public void ShowMain()
     {
         _main ??= new MainWindow();
@@ -131,6 +157,9 @@ public partial class App : Application
         var menu = new Forms.ContextMenuStrip();
         menu.Items.Add("Open CluckWise", null, (_, _) => ShowMain());
         menu.Items.Add("New alarm…", null, (_, _) => { ShowMain(); _main?.NewAlarm(); });
+        _widgetMenuItem = new Forms.ToolStripMenuItem("Floating widget") { CheckOnClick = false };
+        _widgetMenuItem.Click += (_, _) => SetWidgetVisible(!WidgetVisible);
+        menu.Items.Add(_widgetMenuItem);
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add("Quit", null, (_, _) => Quit());
 

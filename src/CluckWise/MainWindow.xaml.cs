@@ -221,6 +221,8 @@ public partial class MainWindow : Window
         view.Refresh();
     }
 
+    public void RefreshWidgetSwitch() => SettingsView?.Refresh();
+
     public void RefreshList()
     {
         System.Windows.Data.CollectionViewSource.GetDefaultView(AlarmList.ItemsSource).Refresh();

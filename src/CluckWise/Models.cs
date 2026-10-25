@@ -206,6 +206,9 @@ public class AppData
     public List<string> GroupOrder { get; set; } = new();
     public bool Use24Hour { get; set; }
     public bool DarkMode { get; set; }
+    public bool ShowWidget { get; set; }
+    public double? WidgetLeft { get; set; }
+    public double? WidgetTop { get; set; }
     public int Streak { get; set; }
     public int BestStreak { get; set; }
     public DateTime? LastOnTimeDate { get; set; }

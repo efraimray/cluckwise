@@ -18,6 +18,14 @@
           </DockPanel>
           <Border Height="1" Background="{DynamicResource Line}"/>
           <DockPanel Margin="0,10">
+            <CheckBox x:Name="WidgetSwitch" DockPanel.Dock="Right" Style="{StaticResource Switch}" Click="Widget_Click"/>
+            <StackPanel VerticalAlignment="Center">
+              <TextBlock Text="Floating widget" FontSize="15" FontWeight="SemiBold"/>
+              <TextBlock Text="A small always-on-top card with the time, next alarm and timers. Drag it anywhere." FontSize="13" Foreground="{DynamicResource Muted}" TextWrapping="Wrap"/>
+            </StackPanel>
+          </DockPanel>
+          <Border Height="1" Background="{DynamicResource Line}"/>
+          <DockPanel Margin="0,10">
             <CheckBox x:Name="DarkSwitch" DockPanel.Dock="Right" Style="{StaticResource Switch}" Click="Dark_Click"/>
             <StackPanel VerticalAlignment="Center">
               <TextBlock Text="Dark mode" FontSize="15" FontWeight="SemiBold"/>

@@ -54,6 +54,7 @@ public partial class SettingsPage : UserControl
     public void Refresh()
     {
         RefreshGroups();
+        WidgetSwitch.IsChecked = App.Current.WidgetVisible;
         WakeStatusText.Text = WakeTimer.ArmedFor is { } at
             ? $"Your PC is set to wake at {at:dddd} {TimeFormat.Time(at)} for the next alarm"
             : "No wake-up scheduled (no upcoming alarm has \"Wake the PC\" on)";
@@ -65,6 +66,9 @@ public partial class SettingsPage : UserControl
         App.Current.SetStartWithWindows(StartupSwitch.IsChecked == true);
         Refresh();
     }
+
+    private void Widget_Click(object sender, RoutedEventArgs e) =>
+        App.Current.SetWidgetVisible(WidgetSwitch.IsChecked == true);
 
     private void Dark_Click(object sender, RoutedEventArgs e)
     {

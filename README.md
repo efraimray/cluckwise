@@ -20,6 +20,7 @@
 - **Wakes the PC from sleep** for alarms (when Windows allows wake timers).
 - **Reminders before alarms**: a quiet heads-up 5–60 minutes before an alarm rings.
 - **PC actions**: lock the PC, turn off the screen, sleep (with a cancellable countdown) or play a song or playlist when an alarm rings.
+- **Floating widget**: a small always-on-top card with the time, next alarm and running timer. Drag it anywhere; it starts in the lower-right corner.
 - **Runs in the tray** and can **start with Windows**, so alarms ring after a restart.
 - **Dark mode** and a **24-hour clock** option.
 - **Drag to rearrange** alarm groups, actions and world clocks.
