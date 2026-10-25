@@ -23,7 +23,7 @@ public partial class AlarmEditorPanel : UserControl
     {
         if (_initialized || DataContext is not Alarm alarm) return;
         _initialized = true;
-        Init(alarm, alarm.IsNew, App.Current.Data.Alarms.Where(a => !a.IsNew).Select(a => a.Group).Distinct());
+        Init(alarm, alarm.IsNew, App.Current.Data.GroupOrder.Concat(App.Current.Data.Alarms.Where(a => !a.IsNew).Select(a => a.Group)).Distinct(StringComparer.OrdinalIgnoreCase));
     }
 
     private void Init(Alarm alarm, bool isNew, IEnumerable<string> groups)
@@ -159,6 +159,50 @@ public partial class AlarmEditorPanel : UserControl
         SummaryText.Text = next is { } n
             ? $"Rings {n:dddd d MMM} at {TimeFormat.Time(n)} · in {Scheduler.Humanize(n - DateTime.Now)}"
             : _edit.Repeat == RepeatMode.Weekly ? "Pick at least one day" : "That time has already passed";
+    }
+
+    private void NewGroup_Click(object sender, RoutedEventArgs e)
+    {
+        NewGroupRow.Visibility = Visibility.Visible;
+        NewGroupError.Visibility = Visibility.Collapsed;
+        NewGroupBox.Clear();
+        NewGroupBox.Focus();
+    }
+
+    private void NewGroupCreate_Click(object sender, RoutedEventArgs e)
+    {
+        var name = NewGroupBox.Text.Trim();
+        if (name.Length == 0) { ShowGroupError("Type a name for the group."); return; }
+        var existing = GroupBox.Items.OfType<string>().FirstOrDefault(g => string.Equals(g, name, StringComparison.OrdinalIgnoreCase));
+        if (existing == null)
+        {
+            GroupBox.Items.Add(name);
+            existing = name;
+            // Remember it so it shows up for other alarms too (placed after the groups already arranged).
+            var order = App.Current.Data.GroupOrder;
+            if (!order.Contains(name, StringComparer.OrdinalIgnoreCase)) order.Add(name);
+            App.Current.SaveData();
+        }
+        GroupBox.SelectedItem = existing;
+        GroupBox.Text = existing;
+        NewGroupRow.Visibility = Visibility.Collapsed;
+    }
+
+    private void NewGroupCancel_Click(object sender, RoutedEventArgs e) => NewGroupRow.Visibility = Visibility.Collapsed;
+
+    private void NewGroupBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key == System.Windows.Input.Key.Enter) { NewGroupCreate_Click(sender, e); e.Handled = true; }
+        else if (e.Key == System.Windows.Input.Key.Escape) { NewGroupCancel_Click(sender, e); e.Handled = true; }
+    }
+
+    private void NewGroupBox_TextChanged(object sender, TextChangedEventArgs e) =>
+        NewGroupHint.Visibility = NewGroupBox.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    private void ShowGroupError(string text)
+    {
+        NewGroupError.Text = text;
+        NewGroupError.Visibility = Visibility.Visible;
     }
 
     private void Volume_Changed(object sender, RoutedPropertyChangedEventArgs<double> e) =>

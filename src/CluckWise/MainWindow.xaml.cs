@@ -214,6 +214,8 @@ public partial class MainWindow : Window
         if (toIndex < 0 || !order.Remove(from)) return;
         order.Insert(Math.Min(toIndex, order.Count), from);
 
+        // Keep groups that have no alarms yet (created with "+ New group") after the visible ones.
+        order.AddRange(App.Current.Data.GroupOrder.Where(g => !order.Contains(g, StringComparer.OrdinalIgnoreCase)));
         App.Current.Data.GroupOrder = order;
         App.Current.SaveData();
         view.Refresh();
