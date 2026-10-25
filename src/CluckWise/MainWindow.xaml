@@ -149,13 +149,13 @@
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
               <TextBlock Text="{Binding Label}" FontSize="15" FontWeight="Bold" TextTrimming="CharacterEllipsis" Margin="0,0,0,6"/>
               <StackPanel x:Name="chips" Orientation="Horizontal" Visibility="Collapsed">
-                <Border x:Name="d0" Style="{DynamicResource Chip}"><TextBlock x:Name="t0" Text="S" Style="{StaticResource DayDotText}"/></Border>
-                <Border x:Name="d1" Style="{DynamicResource Chip}"><TextBlock x:Name="t1" Text="M" Style="{StaticResource DayDotText}"/></Border>
-                <Border x:Name="d2" Style="{DynamicResource Chip}"><TextBlock x:Name="t2" Text="T" Style="{StaticResource DayDotText}"/></Border>
-                <Border x:Name="d3" Style="{DynamicResource Chip}"><TextBlock x:Name="t3" Text="W" Style="{StaticResource DayDotText}"/></Border>
-                <Border x:Name="d4" Style="{DynamicResource Chip}"><TextBlock x:Name="t4" Text="T" Style="{StaticResource DayDotText}"/></Border>
-                <Border x:Name="d5" Style="{DynamicResource Chip}"><TextBlock x:Name="t5" Text="F" Style="{StaticResource DayDotText}"/></Border>
-                <Border x:Name="d6" Style="{DynamicResource Chip}"><TextBlock x:Name="t6" Text="S" Style="{StaticResource DayDotText}"/></Border>
+                <Border x:Name="d0" Style="{StaticResource DayDot}"><TextBlock x:Name="t0" Text="S" Style="{StaticResource DayDotText}"/></Border>
+                <Border x:Name="d1" Style="{StaticResource DayDot}"><TextBlock x:Name="t1" Text="M" Style="{StaticResource DayDotText}"/></Border>
+                <Border x:Name="d2" Style="{StaticResource DayDot}"><TextBlock x:Name="t2" Text="T" Style="{StaticResource DayDotText}"/></Border>
+                <Border x:Name="d3" Style="{StaticResource DayDot}"><TextBlock x:Name="t3" Text="W" Style="{StaticResource DayDotText}"/></Border>
+                <Border x:Name="d4" Style="{StaticResource DayDot}"><TextBlock x:Name="t4" Text="T" Style="{StaticResource DayDotText}"/></Border>
+                <Border x:Name="d5" Style="{StaticResource DayDot}"><TextBlock x:Name="t5" Text="F" Style="{StaticResource DayDotText}"/></Border>
+                <Border x:Name="d6" Style="{StaticResource DayDot}"><TextBlock x:Name="t6" Text="S" Style="{StaticResource DayDotText}"/></Border>
               </StackPanel>
               <TextBlock x:Name="repeatText" Text="{Binding RepeatText, Mode=OneWay}" FontSize="13" Foreground="{DynamicResource Muted}"/>
             </StackPanel>
