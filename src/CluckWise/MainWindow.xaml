@@ -117,6 +117,7 @@
       </ListBox.GroupStyle>
       <ListBox.ItemContainerStyle>
         <Style TargetType="ListBoxItem">
+          <Setter Property="Foreground" Value="{DynamicResource Text}"/>
           <Setter Property="Template">
             <Setter.Value>
               <ControlTemplate TargetType="ListBoxItem">

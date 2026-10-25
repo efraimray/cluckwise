@@ -356,6 +356,7 @@
     </Style>
     <!-- Checkbox: rounded square with a yellow tick box -->
     <Style TargetType="CheckBox">
+      <Setter Property="Foreground" Value="{DynamicResource Text}"/>
       <Setter Property="FontFamily" Value="{StaticResource UiFont}"/>
       <Setter Property="FontSize" Value="14"/>
       <Setter Property="Cursor" Value="Hand"/>
@@ -385,6 +386,7 @@
 
     <!-- Radio button: ring with a yellow dot (the sidebar uses its own NavButton style) -->
     <Style TargetType="RadioButton">
+      <Setter Property="Foreground" Value="{DynamicResource Text}"/>
       <Setter Property="FontFamily" Value="{StaticResource UiFont}"/>
       <Setter Property="FontSize" Value="14"/>
       <Setter Property="Cursor" Value="Hand"/>
@@ -466,6 +468,60 @@
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="b" Property="Background" Value="{DynamicResource Chip}"/></Trigger>
               <Trigger Property="IsSelected" Value="True"><Setter TargetName="b" Property="Background" Value="{DynamicResource YolkSoft}"/></Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    <!-- Date picker: rounded field like the others, with a calendar icon button -->
+    <Style TargetType="DatePickerTextBox">
+      <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+      <Setter Property="CaretBrush" Value="{DynamicResource Text}"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="DatePickerTextBox">
+            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center" Background="Transparent"/>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    <Style TargetType="DatePicker">
+      <Setter Property="Height" Value="44"/>
+      <Setter Property="FontFamily" Value="{StaticResource UiFont}"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="Foreground" Value="{DynamicResource Text}"/>
+      <Setter Property="IsTodayHighlighted" Value="True"/>
+      <Setter Property="SelectedDateFormat" Value="Short"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="DatePicker">
+            <Grid x:Name="PART_Root">
+              <Border x:Name="box" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource FieldLine}" BorderThickness="2" CornerRadius="12" SnapsToDevicePixels="True">
+                <DockPanel Margin="12,0,6,0">
+                  <Button x:Name="PART_Button" DockPanel.Dock="Right" Width="32" Height="32" Focusable="False" Cursor="Hand" ToolTip="Pick a date">
+                    <Button.Template>
+                      <ControlTemplate TargetType="Button">
+                        <Border x:Name="b" Background="Transparent" CornerRadius="8">
+                          <Path Data="M3,5 H17 V17 H3 Z M3,8.5 H17 M7,3 V6.5 M13,3 V6.5" Stroke="{DynamicResource Muted}" StrokeThickness="1.6"
+                                StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="20" Height="20" Stretch="None"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="b" Property="Background" Value="{DynamicResource Chip}"/></Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Button.Template>
+                  </Button>
+                  <DatePickerTextBox x:Name="PART_TextBox"/>
+                </DockPanel>
+              </Border>
+              <Popup x:Name="PART_Popup" Placement="Bottom" PlacementTarget="{Binding ElementName=box}" StaysOpen="False" AllowsTransparency="True"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="box" Property="BorderBrush" Value="{DynamicResource Yolk}"/></Trigger>
+              <Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter TargetName="box" Property="BorderBrush" Value="{DynamicResource Yolk}"/></Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
         </Setter.Value>
