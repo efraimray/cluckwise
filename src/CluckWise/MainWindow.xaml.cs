@@ -29,6 +29,7 @@ public partial class MainWindow : Window
         var now = DateTime.Now;
         ClockText.Text = TimeFormat.Time(now);
         ResortIfDue(now);
+        if (NavTasks != null) UpdateTaskCount();
         foreach (var c in App.Current.Data.WorldClocks) c.Refresh(now);
         DateText.Text = now.ToString("dddd, d MMMM yyyy");
         var next = Scheduler.NextAlarm(App.Current.Data.Alarms, now);
@@ -168,7 +169,10 @@ public partial class MainWindow : Window
 
     private void Nav_Checked(object sender, RoutedEventArgs e)
     {
-        if (AlarmsPage == null || TimersView == null || StopwatchView == null || SettingsView == null || MorningView == null || BirthdaysView == null) return; // still loading
+        if (AlarmsPage == null || TimersView == null || StopwatchView == null || SettingsView == null || MorningView == null || BirthdaysView == null || TasksView == null || CalendarView == null || DeepWorkView == null) return; // still loading
+        DeepWorkView.Visibility = sender == NavDeepWork ? Visibility.Visible : Visibility.Collapsed;
+        CalendarView.Visibility = sender == NavCalendar ? Visibility.Visible : Visibility.Collapsed;
+        TasksView.Visibility = sender == NavTasks ? Visibility.Visible : Visibility.Collapsed;
         BirthdaysView.Visibility = sender == NavBirthdays ? Visibility.Visible : Visibility.Collapsed;
         MorningView.Visibility = sender == NavMorning ? Visibility.Visible : Visibility.Collapsed;
         AlarmsPage.Visibility = sender == NavAlarms ? Visibility.Visible : Visibility.Collapsed;
@@ -254,6 +258,19 @@ public partial class MainWindow : Window
         if (App.Current.Data.Alarms.Any(a => a.IsExpanded)) return;
         _lastSortMinute = now.Minute;
         System.Windows.Data.CollectionViewSource.GetDefaultView(AlarmList.ItemsSource).Refresh();
+    }
+
+    public void ShowTasks(bool focusQuickAdd)
+    {
+        NavTasks.IsChecked = true;
+        if (focusQuickAdd) Dispatcher.BeginInvoke(new Action(() => TasksView.FocusQuickAdd()), System.Windows.Threading.DispatcherPriority.Input);
+    }
+
+    /// <summary>"Tasks · 3" in the sidebar: open tasks due today or overdue.</summary>
+    public void UpdateTaskCount()
+    {
+        int n = App.Current.Data.TodoItems.Count(t => !t.Done && t.Section is "Today" or "Overdue");
+        NavTasks.Content = n > 0 ? $"Tasks · {n}" : "Tasks";
     }
 
     public void RefreshList()

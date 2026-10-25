@@ -58,6 +58,32 @@
         </StackPanel>
       </Border>
 
+      <TextBlock Style="{StaticResource SectionLabel}" Text="KEYBOARD SHORTCUTS"/>
+      <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,10,20,16" Margin="0,0,0,22">
+        <StackPanel>
+          <DockPanel Margin="0,4,0,10">
+            <CheckBox x:Name="HotkeySwitch" DockPanel.Dock="Right" Style="{StaticResource Switch}" Click="Hotkeys_Click"/>
+            <StackPanel VerticalAlignment="Center">
+              <TextBlock Text="Shortcuts that work anywhere in Windows" FontSize="15" FontWeight="SemiBold"/>
+              <TextBlock Text="Even when CluckWise is hidden in the tray" FontSize="13" Foreground="{DynamicResource Muted}"/>
+            </StackPanel>
+          </DockPanel>
+          <ItemsControl x:Name="HotkeyList">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <DockPanel Margin="0,3">
+                  <Border Background="{DynamicResource Chip}" CornerRadius="8" Padding="10,4" Width="120" Margin="0,0,12,0">
+                    <TextBlock Text="{Binding Keys}" FontWeight="Bold" FontSize="13"/>
+                  </Border>
+                  <TextBlock Text="{Binding Does}" VerticalAlignment="Center" FontSize="14"/>
+                </DockPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock x:Name="HotkeyWarning" Foreground="#E5484D" FontSize="13" TextWrapping="Wrap" Margin="0,8,0,0" Visibility="Collapsed"/>
+        </StackPanel>
+      </Border>
+
       <TextBlock Style="{StaticResource SectionLabel}" Text="ALARM GROUPS"/>
       <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16" Margin="0,0,0,22">
         <StackPanel>

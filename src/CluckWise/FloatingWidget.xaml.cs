@@ -33,6 +33,14 @@ public partial class FloatingWidget : Window
             NextWhen.Text = "Double-click to add one";
         }
 
+        FocusPanel.Visibility = DeepWork.Phase == FocusPhase.Idle ? Visibility.Collapsed : Visibility.Visible;
+        if (DeepWork.Phase != FocusPhase.Idle)
+        {
+            var left = DeepWork.Remaining;
+            FocusLabel.Text = DeepWork.Paused ? "PAUSED" : DeepWork.Phase == FocusPhase.Focus ? "FOCUS" : "BREAK";
+            FocusText.Text = $"{(int)left.TotalMinutes:00}:{left.Seconds:00}" + (DeepWork.Phase == FocusPhase.Focus ? " · " + DeepWork.Task : "");
+        }
+
         var timer = data.Timers.Where(t => t.Running).OrderBy(t => t.RemainingSeconds).FirstOrDefault();
         TimerPanel.Visibility = timer == null ? Visibility.Collapsed : Visibility.Visible;
         if (timer != null)

@@ -27,6 +27,10 @@
         <TextBlock Text="NEXT ALARM" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource Yolk}" Margin="0,8,0,1"/>
         <TextBlock x:Name="NextText" FontSize="14" FontWeight="SemiBold" Foreground="White" TextTrimming="CharacterEllipsis" MaxWidth="260"/>
         <TextBlock x:Name="NextWhen" FontSize="12" Foreground="{DynamicResource SideText}"/>
+        <StackPanel x:Name="FocusPanel" Visibility="Collapsed" Margin="0,8,0,0">
+          <TextBlock x:Name="FocusLabel" Text="FOCUS" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource Yolk}" Margin="0,0,0,1"/>
+          <TextBlock x:Name="FocusText" FontSize="14" FontWeight="SemiBold" Foreground="White" TextTrimming="CharacterEllipsis" MaxWidth="260"/>
+        </StackPanel>
         <StackPanel x:Name="TimerPanel" Visibility="Collapsed" Margin="0,8,0,0">
           <TextBlock Text="TIMER" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource Yolk}" Margin="0,0,0,1"/>
           <TextBlock x:Name="TimerText" FontSize="14" FontWeight="SemiBold" Foreground="White" TextTrimming="CharacterEllipsis" MaxWidth="260"/>

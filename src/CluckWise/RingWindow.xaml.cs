@@ -5,6 +5,12 @@ namespace CluckWise;
 
 public partial class RingWindow : Window
 {
+    /// <summary>Ringing popups that are open right now (newest last), for the global hotkeys.</summary>
+    public static readonly List<RingWindow> Open = new();
+
+    public void Snooze() => Snooze_Click(this, new RoutedEventArgs());
+    public void Dismiss() => Dismiss_Click(this, new RoutedEventArgs());
+
     private readonly Alarm? _alarm;
     private readonly CountdownTimer? _timer;
     private bool _handled;
@@ -116,6 +122,13 @@ public partial class RingWindow : Window
         NativeMethods.KeepAwake(false);
         App.Current.SaveData();
         Close();
+    }
+
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+        Open.Add(this);
+        Closed += (_, _) => Open.Remove(this);
     }
 
     protected override void OnClosing(CancelEventArgs e)

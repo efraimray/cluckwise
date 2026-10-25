@@ -36,6 +36,12 @@ public partial class AlarmEditorPanel : UserControl
         if (TimeFormat.Use24Hour) for (int h = 0; h < 24; h++) HourBox.Items.Add(h.ToString("00"));
         else for (int h = 1; h <= 12; h++) HourBox.Items.Add(h.ToString());
         AmPmBox.Visibility = TimeFormat.Use24Hour ? Visibility.Collapsed : Visibility.Visible;
+        if (TimeFormat.Use24Hour) for (int h = 0; h < 24; h++) ExtraHourBox.Items.Add(h.ToString("00"));
+        else for (int h = 1; h <= 12; h++) ExtraHourBox.Items.Add(h.ToString());
+        for (int m = 0; m < 60; m += 5) ExtraMinuteBox.Items.Add(m.ToString("00"));
+        ExtraAmPmBox.Visibility = AmPmBox.Visibility;
+        _extraTimes = _edit.ExtraTimes.ToList();
+        RefreshExtraTimes();
         for (int m = 0; m < 60; m++) MinuteBox.Items.Add(m.ToString("00"));
         string[] letters = { "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" };
         string[] names = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
@@ -154,6 +160,7 @@ public partial class AlarmEditorPanel : UserControl
                      : YearlyRadio.IsChecked == true ? RepeatMode.Yearly : RepeatMode.Weekly;
         _edit.Days = _days.Select(d => d.IsChecked == true).ToArray();
         _edit.OnceDate = OnceDatePicker.SelectedDate ?? DateTime.Today;
+        _edit.ExtraTimes = _extraTimes.ToList();
 
         DaysPanel.Visibility = _edit.Repeat == RepeatMode.Weekly ? Visibility.Visible : Visibility.Collapsed;
         DateRow.Visibility = _edit.Repeat is RepeatMode.Once or RepeatMode.Monthly or RepeatMode.Yearly ? Visibility.Visible : Visibility.Collapsed;
@@ -169,6 +176,46 @@ public partial class AlarmEditorPanel : UserControl
         SummaryText.Text = next is { } n
             ? $"Rings {n:dddd d MMM} at {TimeFormat.Time(n)} · in {Scheduler.Humanize(n - DateTime.Now)}"
             : _edit.Repeat == RepeatMode.Weekly ? "Pick at least one day" : "That time has already passed";
+    }
+
+    private List<int> _extraTimes = new();
+
+    private record ExtraTimeChip(int Minutes, string Text);
+
+    private void RefreshExtraTimes()
+    {
+        ExtraTimesList.ItemsSource = _extraTimes.OrderBy(m => m)
+            .Select(m => new ExtraTimeChip(m, TimeFormat.Time(DateTime.Today.AddMinutes(m)))).ToList();
+        if (!_loading) UpdateState();
+    }
+
+    private void AddTime_Click(object sender, RoutedEventArgs e)
+    {
+        // Start from the main time plus 1 hour as a sensible guess.
+        int start = (_edit.Hour * 60 + _edit.Minute + 60) % (24 * 60);
+        int h = start / 60, m = start % 60 / 5 * 5;
+        ExtraHourBox.SelectedIndex = TimeFormat.Use24Hour ? h : (h % 12 == 0 ? 12 : h % 12) - 1;
+        ExtraMinuteBox.SelectedIndex = m / 5;
+        ExtraAmPmBox.SelectedIndex = h < 12 ? 0 : 1;
+        AddTimeRow.Visibility = Visibility.Visible;
+    }
+
+    private void AddTimeConfirm_Click(object sender, RoutedEventArgs e)
+    {
+        int hour = TimeFormat.Use24Hour
+            ? Math.Max(0, ExtraHourBox.SelectedIndex)
+            : (ExtraHourBox.SelectedIndex + 1) % 12 + (ExtraAmPmBox.SelectedIndex == 1 ? 12 : 0);
+        int minutes = hour * 60 + Math.Max(0, ExtraMinuteBox.SelectedIndex) * 5;
+        if (minutes != _edit.Hour * 60 + _edit.Minute && !_extraTimes.Contains(minutes)) _extraTimes.Add(minutes);
+        AddTimeRow.Visibility = Visibility.Collapsed;
+        RefreshExtraTimes();
+    }
+
+    private void AddTimeCancel_Click(object sender, RoutedEventArgs e) => AddTimeRow.Visibility = Visibility.Collapsed;
+
+    private void RemoveExtraTime_Click(object sender, RoutedEventArgs e)
+    {
+        if (((FrameworkElement)sender).Tag is int m) { _extraTimes.Remove(m); RefreshExtraTimes(); }
     }
 
     private void NewGroup_Click(object sender, RoutedEventArgs e)

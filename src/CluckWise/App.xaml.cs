@@ -48,6 +48,7 @@ public partial class App : Application
         Scheduler = new Scheduler(Data);
         Scheduler.AlarmDue += OnAlarmDue;
         Scheduler.BirthdayDue += b => { SaveData(); new CelebrationWindow(b).Show(); };
+        Scheduler.TaskDue += t => { SaveData(); ShowOrQueue(() => new TaskReminderWindow(t).Show()); };
         Scheduler.BirthdayTomorrow += b =>
         {
             SaveData();
@@ -57,7 +58,7 @@ public partial class App : Application
         {
             SaveData();
             var mins = Math.Max(1, (int)Math.Round((when - DateTime.Now).TotalMinutes));
-            ShowTrayMessage($"Coming up: {alarm.Label}", $"Rings at {TimeFormat.Time(when)} (in {mins} min)");
+            ShowOrQueue(() => ShowTrayMessage($"Coming up: {alarm.Label}", $"Rings at {TimeFormat.Time(when)} (in {mins} min)"));
         };
         Scheduler.TimerDone += t => { SaveData(); new RingWindow(t).Show(); };
         // Timers that finished while CluckWise was closed show as done straight away.
@@ -68,6 +69,8 @@ public partial class App : Application
         if (!e.Args.Contains("--minimized")) _main.Show();
         Scheduler.Start();
         if (Data.ShowWidget) SetWidgetVisible(true);
+        DefineHotkeys();
+        if (Data.HotkeysEnabled) GlobalHotkeys.Enable();
 
         try { WindowsStartup.RefreshPath(); } catch { }
         if (!Data.AskedAboutStartup) Dispatcher.BeginInvoke(new Action(AskAboutStartup));
@@ -117,7 +120,48 @@ public partial class App : Application
         SaveData();
     }
 
+    /// <summary>True during a Deep Work focus session: reminders wait until the break.</summary>
+    public bool InFocus { get; set; }
+    private readonly List<Action> _heldDuringFocus = new();
+
+    /// <summary>Shows a reminder now, or holds it until the focus session ends.</summary>
+    public void ShowOrQueue(Action show)
+    {
+        if (InFocus) _heldDuringFocus.Add(show);
+        else show();
+    }
+
+    /// <summary>Called when a focus session ends or a break starts.</summary>
+    public void ReleaseHeld()
+    {
+        var held = _heldDuringFocus.ToList();
+        _heldDuringFocus.Clear();
+        foreach (var show in held) show();
+    }
+
+    /// <summary>Raised by Ctrl+Alt+F; the Deep Work page listens to start or stop a session.</summary>
+    public event Action? FocusHotkey;
+
+    private void DefineHotkeys() => GlobalHotkeys.Define(new()
+    {
+        new(1, System.Windows.Input.Key.C, "Ctrl+Alt+C", "Open CluckWise", ShowMain),
+        new(2, System.Windows.Input.Key.N, "Ctrl+Alt+N", "New alarm", () => { ShowMain(); _main?.NewAlarm(); }),
+        new(3, System.Windows.Input.Key.S, "Ctrl+Alt+S", "Snooze the ringing alarm", () => RingWindow.Open.LastOrDefault()?.Snooze()),
+        new(4, System.Windows.Input.Key.D, "Ctrl+Alt+D", "Dismiss the ringing alarm", () => RingWindow.Open.LastOrDefault()?.Dismiss()),
+        new(5, System.Windows.Input.Key.W, "Ctrl+Alt+W", "Show or hide the floating widget", () => SetWidgetVisible(!WidgetVisible)),
+        new(6, System.Windows.Input.Key.F, "Ctrl+Alt+F", "Start or stop a Deep Work session", () => FocusHotkey?.Invoke()),
+        new(7, System.Windows.Input.Key.K, "Ctrl+Alt+K", "Add a task", () => { ShowMain(); _main?.ShowTasks(focusQuickAdd: true); }),
+    });
+
+    public void SetHotkeysEnabled(bool on)
+    {
+        Data.HotkeysEnabled = on;
+        if (on) GlobalHotkeys.Enable(); else GlobalHotkeys.Disable();
+        SaveData();
+    }
+
     public void RefreshAlarmList() => _main?.RefreshList();
+    public void TasksChanged() => _main?.UpdateTaskCount();
 
     private FloatingWidget? _widget;
     private Forms.ToolStripMenuItem? _widgetMenuItem;
@@ -187,6 +231,7 @@ public partial class App : Application
 
     public void Quit()
     {
+        GlobalHotkeys.Disable();
         SaveData();
         Sounds.Stop();
         if (_tray != null) { _tray.Visible = false; _tray.Dispose(); }

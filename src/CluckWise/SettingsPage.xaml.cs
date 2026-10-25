@@ -55,6 +55,13 @@ public partial class SettingsPage : UserControl
     {
         RefreshGroups();
         WidgetSwitch.IsChecked = App.Current.WidgetVisible;
+        HotkeySwitch.IsChecked = App.Current.Data.HotkeysEnabled;
+        HotkeyList.ItemsSource = null;
+        HotkeyList.ItemsSource = GlobalHotkeys.All;
+        var failed = App.Current.Data.HotkeysEnabled ? GlobalHotkeys.Failed : new();
+        HotkeyWarning.Text = failed.Count == 0 ? "" :
+            "Already used by another app, so not available: " + string.Join(", ", failed.Select(k => k.Keys));
+        HotkeyWarning.Visibility = failed.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
         WakeStatusText.Text = WakeTimer.ArmedFor is { } at
             ? $"Your PC is set to wake at {at:dddd} {TimeFormat.Time(at)} for the next alarm"
             : "No wake-up scheduled (no upcoming alarm has \"Wake the PC\" on)";
@@ -64,6 +71,12 @@ public partial class SettingsPage : UserControl
     private void Startup_Click(object sender, RoutedEventArgs e)
     {
         App.Current.SetStartWithWindows(StartupSwitch.IsChecked == true);
+        Refresh();
+    }
+
+    private void Hotkeys_Click(object sender, RoutedEventArgs e)
+    {
+        App.Current.SetHotkeysEnabled(HotkeySwitch.IsChecked == true);
         Refresh();
     }
 

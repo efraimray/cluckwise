@@ -29,13 +29,18 @@
             <TextBlock x:Name="SideTodoText" FontSize="12" Foreground="#BDB3A6"/>
           </StackPanel>
         </Border>
-        <StackPanel>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel>
           <RadioButton x:Name="NavAlarms" Style="{StaticResource NavButton}" GroupName="nav" Content="Alarms" IsChecked="True" Checked="Nav_Checked"/>
           <RadioButton x:Name="NavTimers" Style="{StaticResource NavButton}" GroupName="nav" Content="Timers" Checked="Nav_Checked"/>
           <RadioButton x:Name="NavStopwatch" Style="{StaticResource NavButton}" GroupName="nav" Content="Stopwatch" Checked="Nav_Checked"/>
+          <RadioButton x:Name="NavTasks" Style="{StaticResource NavButton}" GroupName="nav" Content="Tasks" Checked="Nav_Checked"/>
           <RadioButton x:Name="NavMorning" Style="{StaticResource NavButton}" GroupName="nav" Content="Morning to-do" Checked="Nav_Checked"/>
           <RadioButton x:Name="NavBirthdays" Style="{StaticResource NavButton}" GroupName="nav" Content="Birthdays" Checked="Nav_Checked"/>
+          <RadioButton x:Name="NavCalendar" Style="{StaticResource NavButton}" GroupName="nav" Content="Calendar" Checked="Nav_Checked"/>
+          <RadioButton x:Name="NavDeepWork" Style="{StaticResource NavButton}" GroupName="nav" Content="Deep Work" Checked="Nav_Checked"/>
         </StackPanel>
+        </ScrollViewer>
       </DockPanel>
     </Border>
   <DockPanel x:Name="AlarmsPage" Grid.Column="1" Margin="28,22">
@@ -168,6 +173,7 @@
                 <Border x:Name="d6" Style="{StaticResource DayDot}"><TextBlock x:Name="t6" Text="Sa" Style="{StaticResource DayDotText}"/></Border>
               </StackPanel>
               <TextBlock x:Name="repeatText" Text="{Binding RepeatText, Mode=OneWay}" FontSize="13" Foreground="{DynamicResource Muted}"/>
+              <TextBlock x:Name="extraTimesText" Text="{Binding ExtraTimesText, Mode=OneWay}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource Yolk}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
             </StackPanel>
             <TextBlock x:Name="countdownText" Grid.Column="2" Width="160" Text="{Binding Countdown, Mode=OneWay}" FontSize="13" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
             <TextBlock x:Name="soundText" Grid.Column="3" Width="140" Text="{Binding Sound, Converter={StaticResource SoundName}}" FontSize="13" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
@@ -194,6 +200,9 @@
               <Setter TargetName="soundText" Property="Visibility" Value="Collapsed"/>
               <Setter TargetName="countdownText" Property="Width" Value="120"/>
             </DataTrigger>
+            <DataTrigger Binding="{Binding ExtraTimesText}" Value="">
+              <Setter TargetName="extraTimesText" Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
             <DataTrigger Binding="{Binding Repeat}" Value="Weekly">
               <Setter TargetName="chips" Property="Visibility" Value="Visible"/>
               <Setter TargetName="repeatText" Property="Visibility" Value="Collapsed"/>
@@ -214,6 +223,9 @@
   <local:StopwatchPage x:Name="StopwatchView" Grid.Column="1" Margin="28,22" Visibility="Collapsed"/>
   <local:SettingsPage x:Name="SettingsView" Grid.Column="1" Margin="28,22" Visibility="Collapsed"/>
   <local:MorningPage x:Name="MorningView" Grid.Column="1" Margin="28,22" Visibility="Collapsed"/>
+  <local:TasksPage x:Name="TasksView" Grid.Column="1" Margin="28,22" Visibility="Collapsed"/>
+  <local:CalendarPage x:Name="CalendarView" Grid.Column="1" Margin="28,22" Visibility="Collapsed"/>
+  <local:DeepWorkPage x:Name="DeepWorkView" Grid.Column="1" Margin="28,22" Visibility="Collapsed"/>
   <local:BirthdaysPage x:Name="BirthdaysView" Grid.Column="1" Margin="28,22" Visibility="Collapsed"/>
   <Border x:Name="UndoBar" Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,28"
           Background="{DynamicResource Ink}" CornerRadius="14" Padding="20,10,10,10" Visibility="Collapsed" Opacity="0">

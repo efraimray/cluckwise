@@ -9,10 +9,15 @@
 ## Features
 
 - **Alarms**: one-time, every day, chosen weekdays, monthly (e.g. "pay rent on the 1st") or yearly, organised into groups (Morning, Work, Exercise…). Edit them inline by clicking a card.
+- **Several times in one alarm**: e.g. "John's Class" at 9:00 AM and 6:00 PM.
 - **Snooze and gentle wake-up**: the volume rises over 30 seconds. Choose a snooze length per alarm.
 - **Original sounds**: Rooster Crow, Sunrise Chime, Gentle Beep, Classic Bell and Marimba, all synthesised in code. You can also use your own MP3/WAV files.
 - **"When it rings…" actions**: open a website, app, file or folder automatically. *Run silently* turns an alarm into a scheduled task.
 - **Morning to-do and streak**: dismiss a morning alarm to see your daily checklist. Mornings without snoozing build your streak.
+- **Tasks with reminders**: quick add understands "Call Mum at 3pm" or "Pay rent tomorrow 9am !high"; Today / Upcoming / Overdue / Done; reminder popup with Done, Snooze or Tomorrow.
+- **Calendar**: a month view of alarms, birthdays and tasks.
+- **Deep Work mode**: focus sessions with breaks, a progress ring, background sounds, reminders held until the break, and focus stats.
+- **Global hotkeys** (Ctrl+Alt+…): open, new alarm, snooze, dismiss, widget, focus, add task.
 - **Timers**: several countdowns at once, with quick presets (1, 5, 10, 25 min focus, 1 hour).
 - **Stopwatch** with laps.
 - **World clocks**: other cities' times on the dashboard.

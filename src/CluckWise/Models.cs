@@ -60,6 +60,17 @@ public class Alarm : Observable
     /// <summary>Date for one-time alarms; for monthly/yearly alarms, the day (and month) they repeat on.</summary>
     public DateTime OnceDate { get; set; } = DateTime.Today;
 
+    /// <summary>Extra times of day this alarm also rings at, in minutes after midnight (e.g. 1080 = 6:00 PM).</summary>
+    public List<int> ExtraTimes { get; set; } = new();
+
+    /// <summary>The main time plus any extra times, earliest first.</summary>
+    public IEnumerable<TimeSpan> AllTimes() =>
+        new[] { Hour * 60 + Minute }.Concat(ExtraTimes).Distinct().OrderBy(m => m).Select(m => TimeSpan.FromMinutes(m));
+
+    [JsonIgnore]
+    public string ExtraTimesText => ExtraTimes.Count == 0 ? "" :
+        "Also at " + string.Join(", ", ExtraTimes.OrderBy(m => m).Select(m => TimeFormat.Time(DateTime.Today.AddMinutes(m))));
+
     public string Sound { get; set; } = Sounds.RoosterCrow;
     public int Volume { get; set; } = 80;
     public bool GentleWake { get; set; } = true;
@@ -150,6 +161,7 @@ public class Alarm : Observable
         Raise(nameof(RepeatText));
         Raise(nameof(SummaryText));
         Raise(nameof(Label));
+        Raise(nameof(ExtraTimesText));
         Raise(nameof(Group));
         Raise(nameof(Sound));
     }
@@ -170,6 +182,7 @@ public class Alarm : Observable
         Group = o.Group;
         Repeat = o.Repeat;
         Days = (bool[])o.Days.Clone();
+        ExtraTimes = o.ExtraTimes.ToList();
         OnceDate = o.OnceDate;
         Sound = o.Sound;
         Volume = o.Volume;
@@ -191,6 +204,7 @@ public class AppData
     public ObservableCollection<CountdownTimer> Timers { get; set; } = new();
     public ObservableCollection<WorldClock> WorldClocks { get; set; } = new();
     public ObservableCollection<Birthday> Birthdays { get; set; } = new();
+    public ObservableCollection<TaskItem> TodoItems { get; set; } = new();
     public bool StartWithWindows { get; set; }
     public bool ShowedTrayTip { get; set; }
     public bool AskedAboutStartup { get; set; }
@@ -209,6 +223,17 @@ public class AppData
     /// <summary>"Soonest" = one list, next alarm first; "Groups" = grouped by Morning, Work….</summary>
     public string AlarmSort { get; set; } = "Soonest";
     public bool ShowWidget { get; set; }
+    public bool HotkeysEnabled { get; set; } = true;
+
+    // Deep Work
+    public int FocusMinutes { get; set; } = 25;
+    public int BreakMinutes { get; set; } = 5;
+    public int LongBreakMinutes { get; set; } = 15;
+    public bool FocusAutoRepeat { get; set; } = true;
+    public bool QuietDuringFocus { get; set; } = true;
+    public string FocusSound { get; set; } = "None";
+    /// <summary>Focus minutes per day, keyed "yyyy-MM-dd".</summary>
+    public Dictionary<string, int> FocusLog { get; set; } = new();
     public double? WidgetLeft { get; set; }
     public double? WidgetTop { get; set; }
     public int Streak { get; set; }

@@ -54,6 +54,41 @@
           </StackPanel>
         </Border>
 
+        <TextBlock Style="{StaticResource SectionLabel}" Text="MORE TIMES"/>
+        <WrapPanel x:Name="ExtraTimesPanel" Margin="0,0,0,4">
+          <ItemsControl x:Name="ExtraTimesList">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Background="{DynamicResource YolkSoft}" BorderBrush="{DynamicResource Yolk}" BorderThickness="1" CornerRadius="12" Padding="12,4,4,4" Margin="0,0,8,8">
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Text}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <Button Content="✕" Width="26" Height="26" Margin="6,0,0,0" Background="Transparent" BorderThickness="0" Cursor="Hand"
+                            Foreground="{DynamicResource Muted}" ToolTip="Remove this time" Tag="{Binding Minutes}" Click="RemoveExtraTime_Click"/>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Button x:Name="AddTimeButton" Style="{StaticResource SecondaryButton}" Content="+ Add another time" Height="36" Margin="0,0,0,8" Click="AddTime_Click"
+                  ToolTip="Ring at more than one time, e.g. a class at 9:00 AM and 6:00 PM"/>
+        </WrapPanel>
+        <Border x:Name="AddTimeRow" Visibility="Collapsed" Background="{DynamicResource SurfaceAlt}" BorderBrush="{DynamicResource FieldLine}" BorderThickness="1" CornerRadius="12" Padding="10" Margin="0,0,0,12">
+          <StackPanel Orientation="Horizontal">
+            <ComboBox x:Name="ExtraHourBox" Width="80"/>
+            <TextBlock Text=":" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource Yolk}" Margin="6,0" VerticalAlignment="Center"/>
+            <ComboBox x:Name="ExtraMinuteBox" Width="80"/>
+            <ComboBox x:Name="ExtraAmPmBox" Width="80" Margin="8,0,0,0">
+              <ComboBoxItem Content="AM"/>
+              <ComboBoxItem Content="PM"/>
+            </ComboBox>
+            <Button Style="{StaticResource PrimaryButton}" Content="Add" Height="40" Margin="10,0,0,0" Click="AddTimeConfirm_Click"/>
+            <Button Style="{StaticResource SecondaryButton}" Content="Cancel" Height="40" Margin="8,0,0,0" Click="AddTimeCancel_Click"/>
+          </StackPanel>
+        </Border>
+
         <TextBlock Style="{StaticResource SectionLabel}" Text="REPEAT"/>
         <WrapPanel Margin="0,0,0,6">
           <RadioButton x:Name="OnceRadio" Content="Once" GroupName="repeat" Margin="0,0,18,6" Checked="Changed"/>

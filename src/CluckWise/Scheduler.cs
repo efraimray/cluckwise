@@ -21,6 +21,8 @@ public class Scheduler
     public event Action<Birthday>? BirthdayDue;
     /// <summary>Raised once a year at 9 AM the day before a birthday.</summary>
     public event Action<Birthday>? BirthdayTomorrow;
+    /// <summary>Raised when a task with a due time (or its snooze) comes due.</summary>
+    public event Action<TaskItem>? TaskDue;
     private static readonly TimeSpan BirthdayTime = new(9, 0, 0);
     private DateTime _lastWakeUpdate = DateTime.MinValue;
 
@@ -47,7 +49,8 @@ public class Scheduler
             if (DueNow(alarm, _lastCheck, now) is { } d)
             {
                 alarm.LastRung = d;
-                if (alarm.Repeat == RepeatMode.Once) alarm.Enabled = false;
+                // A one-time alarm turns off after its last time has rung.
+                if (alarm.Repeat == RepeatMode.Once && NextOccurrence(alarm, d) == null) alarm.Enabled = false;
                 AlarmDue?.Invoke(alarm);
             }
         }
@@ -91,6 +94,18 @@ public class Scheduler
             }
         }
 
+        foreach (var task in _data.TodoItems.ToList())
+        {
+            if (task.Done || task.Reminded || !task.HasTime || task.Due is not { } due) continue;
+            var at = task.SnoozedUntil ?? due;
+            // Don't pop up for tasks that went overdue long ago (e.g. while the PC was off for days).
+            if (now >= at && now - at < TimeSpan.FromHours(12))
+            {
+                task.Reminded = true;
+                TaskDue?.Invoke(task);
+            }
+        }
+
         Morning.ResetIfNewDay(_data);
         _lastCheck = now;
         foreach (var alarm in _data.Alarms) alarm.Countdown = CountdownText(alarm, now);
@@ -111,7 +126,18 @@ public class Scheduler
     /// <summary>The first time strictly after <paramref name="after"/> that the alarm should ring.</summary>
     public static DateTime? NextOccurrence(Alarm alarm, DateTime after)
     {
-        var time = new TimeSpan(alarm.Hour, alarm.Minute, 0);
+        // An alarm can ring at several times a day (e.g. a class at 9:00 and 18:00): take the soonest.
+        DateTime? best = null;
+        foreach (var time in alarm.AllTimes())
+        {
+            var next = NextOccurrence(alarm, after, time);
+            if (next is { } n && (best is null || n < best)) best = n;
+        }
+        return best;
+    }
+
+    private static DateTime? NextOccurrence(Alarm alarm, DateTime after, TimeSpan time)
+    {
         switch (alarm.Repeat)
         {
             case RepeatMode.Once:
