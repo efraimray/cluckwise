@@ -21,6 +21,8 @@
 - **Reminders before alarms**: a quiet heads-up 5–60 minutes before an alarm rings.
 - **PC actions**: lock the PC, turn off the screen, sleep (with a cancellable countdown) or play a song or playlist when an alarm rings.
 - **Runs in the tray** and can **start with Windows**, so alarms ring after a restart.
+- **Dark mode** and a **24-hour clock** option.
+- **Drag to rearrange** alarm groups, actions and world clocks.
 - **Keyboard shortcuts**: Space to dismiss, S to snooze, Ctrl+N for a new alarm, Esc to close a card.
 
 ## Requirements
@@ -61,7 +63,7 @@ Alarms, timers and settings are saved to `%AppData%\CluckWise\data.json`. Settin
 - [x] Wake the PC from sleep for alarms
 - [x] Reminders before alarms
 - [x] More actions (lock, sleep, turn off screen, play music)
-- [ ] Dark mode
+- [x] Dark mode
 - [ ] Installer and code signing
 
 ## Author

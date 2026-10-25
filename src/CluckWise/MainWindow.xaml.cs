@@ -13,9 +13,7 @@ public partial class MainWindow : Window
         WorldClockList.ItemsSource = App.Current.Data.WorldClocks;
         var view = System.Windows.Data.CollectionViewSource.GetDefaultView(AlarmList.ItemsSource);
         view.GroupDescriptions.Add(new System.Windows.Data.PropertyGroupDescription(nameof(Alarm.Group)));
-        view.SortDescriptions.Add(new SortDescription(nameof(Alarm.Group), ListSortDirection.Ascending));
-        view.SortDescriptions.Add(new SortDescription(nameof(Alarm.Hour), ListSortDirection.Ascending));
-        view.SortDescriptions.Add(new SortDescription(nameof(Alarm.Minute), ListSortDirection.Ascending));
+        ((System.Windows.Data.ListCollectionView)view).CustomSort = new AlarmSorter(App.Current.Data);
         App.Current.Scheduler.Ticked += UpdateNext;
         UpdateNext();
         RefreshStartupSwitch();
@@ -28,13 +26,13 @@ public partial class MainWindow : Window
     private void UpdateNext()
     {
         var now = DateTime.Now;
-        ClockText.Text = now.ToString("h:mm tt");
+        ClockText.Text = TimeFormat.Time(now);
         foreach (var c in App.Current.Data.WorldClocks) c.Refresh(now);
         DateText.Text = now.ToString("dddd, d MMMM yyyy");
         var next = Scheduler.NextAlarm(App.Current.Data.Alarms, now);
         if (next is { } n)
         {
-            NextText.Text = $"{n.when:h:mm tt} · {n.alarm.Label}";
+            NextText.Text = $"{TimeFormat.Time(n.when)} · {n.alarm.Label}";
             NextWhen.Text = $"{n.when:dddd} · rings in {Scheduler.Humanize(n.when - now)}";
         }
         else
@@ -195,6 +193,30 @@ public partial class MainWindow : Window
     private void Clock_Drop(object sender, DragEventArgs e)
     {
         if (DragReorder.Drop(sender, e)) App.Current.SaveData();
+    }
+
+    // Drag a group heading (Morning, Work…) onto another to change the order of groups.
+    private void Group_MouseDown(object sender, MouseButtonEventArgs e) => DragReorder.MouseDown(sender, e);
+    private void Group_MouseMove(object sender, MouseEventArgs e) => DragReorder.MouseMove(sender, e);
+    private void Group_DragOver(object sender, DragEventArgs e) => DragReorder.DragOver(sender, e);
+    private void Group_DragLeave(object sender, DragEventArgs e) => DragReorder.DragLeave(sender, e);
+    private void Group_Drop(object sender, DragEventArgs e)
+    {
+        DragReorder.DragLeave(sender, e);
+        if (e.Data.GetData(typeof(object)) is not System.Windows.Data.CollectionViewGroup dragged) return;
+        if (((FrameworkElement)sender).DataContext is not System.Windows.Data.CollectionViewGroup target || dragged == target) return;
+
+        var view = System.Windows.Data.CollectionViewSource.GetDefaultView(AlarmList.ItemsSource);
+        var order = view.Groups.OfType<System.Windows.Data.CollectionViewGroup>()
+                        .Select(g => g.Name?.ToString() ?? "").Where(n => n.Trim() != "New").ToList();
+        string from = dragged.Name?.ToString() ?? "", to = target.Name?.ToString() ?? "";
+        int toIndex = order.IndexOf(to);
+        if (toIndex < 0 || !order.Remove(from)) return;
+        order.Insert(Math.Min(toIndex, order.Count), from);
+
+        App.Current.Data.GroupOrder = order;
+        App.Current.SaveData();
+        view.Refresh();
     }
 
     public void RefreshStartupSwitch() => SettingsView?.Refresh();

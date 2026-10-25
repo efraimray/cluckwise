@@ -33,7 +33,9 @@ public partial class AlarmEditorPanel : UserControl
         _actions = _edit.Actions.ToList();
         DeleteButton.Visibility = isNew ? Visibility.Collapsed : Visibility.Visible;
 
-        for (int h = 1; h <= 12; h++) HourBox.Items.Add(h.ToString());
+        if (TimeFormat.Use24Hour) for (int h = 0; h < 24; h++) HourBox.Items.Add(h.ToString("00"));
+        else for (int h = 1; h <= 12; h++) HourBox.Items.Add(h.ToString());
+        AmPmBox.Visibility = TimeFormat.Use24Hour ? Visibility.Collapsed : Visibility.Visible;
         for (int m = 0; m < 60; m++) MinuteBox.Items.Add(m.ToString("00"));
         string[] letters = { "S", "M", "T", "W", "T", "F", "S" };
         for (int i = 0; i < 7; i++)
@@ -49,7 +51,7 @@ public partial class AlarmEditorPanel : UserControl
         ReminderBox.Items.Add("Off");
         foreach (var n in new[] { 5, 10, 15, 30, 60 }) ReminderBox.Items.Add($"{n} min before");
 
-        HourBox.SelectedIndex = (_edit.Hour % 12 == 0 ? 12 : _edit.Hour % 12) - 1;
+        HourBox.SelectedIndex = TimeFormat.Use24Hour ? _edit.Hour : (_edit.Hour % 12 == 0 ? 12 : _edit.Hour % 12) - 1;
         MinuteBox.SelectedIndex = _edit.Minute;
         AmPmBox.SelectedIndex = _edit.Hour < 12 ? 0 : 1;
         OnceRadio.IsChecked = _edit.Repeat == RepeatMode.Once;
@@ -129,8 +131,12 @@ public partial class AlarmEditorPanel : UserControl
     private void UpdateState()
     {
         if (_loading) return;
-        int hour12 = HourBox.SelectedIndex + 1;
-        _edit.Hour = hour12 % 12 + (AmPmBox.SelectedIndex == 1 ? 12 : 0);
+        if (TimeFormat.Use24Hour) _edit.Hour = Math.Max(0, HourBox.SelectedIndex);
+        else
+        {
+            int hour12 = HourBox.SelectedIndex + 1;
+            _edit.Hour = hour12 % 12 + (AmPmBox.SelectedIndex == 1 ? 12 : 0);
+        }
         _edit.Minute = Math.Max(0, MinuteBox.SelectedIndex);
         _edit.Repeat = OnceRadio.IsChecked == true ? RepeatMode.Once
                      : DailyRadio.IsChecked == true ? RepeatMode.Daily
@@ -150,7 +156,7 @@ public partial class AlarmEditorPanel : UserControl
 
         var next = Scheduler.NextOccurrence(_edit, DateTime.Now);
         SummaryText.Text = next is { } n
-            ? $"Rings {n:dddd d MMM} at {n:h:mm tt} · in {Scheduler.Humanize(n - DateTime.Now)}"
+            ? $"Rings {n:dddd d MMM} at {TimeFormat.Time(n)} · in {Scheduler.Humanize(n - DateTime.Now)}"
             : _edit.Repeat == RepeatMode.Weekly ? "Pick at least one day" : "That time has already passed";
     }
 
@@ -230,6 +236,16 @@ public partial class AlarmEditorPanel : UserControl
     private void RemoveAction_Click(object sender, RoutedEventArgs e)
     {
         if (ActionsList.SelectedItem is AlarmAction a) { _actions.Remove(a); RefreshActions(); }
+    }
+
+    // Drag an action onto another to change the order they run in.
+    private void Action_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e) => DragReorder.MouseDown(sender, e);
+    private void Action_MouseMove(object sender, System.Windows.Input.MouseEventArgs e) => DragReorder.MouseMove(sender, e);
+    private void Action_DragOver(object sender, DragEventArgs e) => DragReorder.DragOver(sender, e);
+    private void Action_DragLeave(object sender, DragEventArgs e) => DragReorder.DragLeave(sender, e);
+    private void Action_Drop(object sender, DragEventArgs e)
+    {
+        if (DragReorder.Drop(sender, e)) RefreshActions();
     }
 
     private void RefreshActions()

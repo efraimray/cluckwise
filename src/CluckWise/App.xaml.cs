@@ -32,6 +32,11 @@ public partial class App : Application
         ThreadPool.RegisterWaitForSingleObject(_showSignal, (_, _) => Dispatcher.Invoke(ShowMain), null, -1, false);
 
         Data = Storage.Load();
+        TimeFormat.Use24Hour = Data.Use24Hour;
+        Theme.Apply(Data.DarkMode);
+        // Every window (including popups) gets the matching title bar when it opens.
+        EventManager.RegisterClassHandler(typeof(Window), FrameworkElement.LoadedEvent,
+            new RoutedEventHandler((sender, _) => Theme.ApplyTitleBar((Window)sender)));
         if (!Data.SeededTasks)
         {
             if (Data.Tasks.Count == 0)
@@ -52,7 +57,7 @@ public partial class App : Application
         {
             SaveData();
             var mins = Math.Max(1, (int)Math.Round((when - DateTime.Now).TotalMinutes));
-            ShowTrayMessage($"Coming up: {alarm.Label}", $"Rings at {when:h:mm tt} (in {mins} min)");
+            ShowTrayMessage($"Coming up: {alarm.Label}", $"Rings at {TimeFormat.Time(when)} (in {mins} min)");
         };
         Scheduler.TimerDone += t => { SaveData(); new RingWindow(t).Show(); };
         // Timers that finished while CluckWise was closed show as done straight away.
@@ -79,7 +84,7 @@ public partial class App : Application
         ActionRunner.RunAll(alarm);
         if (alarm.RunSilently)
         {
-            ShowTrayMessage(alarm.Label, "Actions ran at " + DateTime.Now.ToString("h:mm tt"));
+            ShowTrayMessage(alarm.Label, "Actions ran at " + TimeFormat.Time(DateTime.Now));
             return;
         }
         NativeMethods.KeepAwake(true);

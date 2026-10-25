@@ -146,7 +146,7 @@ public class Scheduler
 
     public static string CountdownText(Alarm alarm, DateTime now)
     {
-        if (alarm.SnoozedUntil is { } s) return "Snoozed until " + s.ToString("h:mm tt");
+        if (alarm.SnoozedUntil is { } s) return "Snoozed until " + TimeFormat.Time(s);
         if (!alarm.Enabled) return "Off";
         if (NextOccurrence(alarm, now) is not { } next) return "Not scheduled";
         return "in " + Humanize(next - now);

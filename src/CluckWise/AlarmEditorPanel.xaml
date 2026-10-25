@@ -18,7 +18,7 @@
     </EventTrigger>
   </UserControl.Triggers>
   <DockPanel>
-    <Border DockPanel.Dock="Bottom" BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0" Padding="0,14,0,0" Margin="0,16,0,0">
+    <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource Line}" BorderThickness="0,1,0,0" Padding="0,14,0,0" Margin="0,16,0,0">
       <DockPanel>
         <Button x:Name="DeleteButton" Style="{StaticResource SecondaryButton}" Content="Delete" Click="Delete_Click"/>
         <Button Style="{StaticResource SecondaryButton}" Content="Ring now" Margin="10,0,0,0" Click="RingNow_Click" ToolTip="Hear and see this alarm right away (actions are not run)"/>
@@ -26,7 +26,7 @@
           <Button Style="{StaticResource SecondaryButton}" Content="Cancel" Margin="0,0,10,0" Click="Cancel_Click"/>
           <Button Style="{StaticResource PrimaryButton}" Content="Save alarm" Click="Save_Click"/>
         </StackPanel>
-        <TextBlock x:Name="SummaryText" Foreground="{StaticResource Muted}" VerticalAlignment="Center" Margin="16,0" TextTrimming="CharacterEllipsis"/>
+        <TextBlock x:Name="SummaryText" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="16,0" TextTrimming="CharacterEllipsis"/>
       </DockPanel>
     </Border>
 
@@ -42,10 +42,10 @@
       </Grid.RowDefinitions>
 
       <StackPanel>
-        <Border Background="{StaticResource Ink}" CornerRadius="20" Padding="12" Margin="0,0,0,20">
+        <Border Background="{DynamicResource Ink}" CornerRadius="20" Padding="12" Margin="0,0,0,20">
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
             <ComboBox x:Name="HourBox" Style="{StaticResource TimeCombo}" Width="96" SelectionChanged="Changed"/>
-            <TextBlock Text=":" FontSize="40" FontWeight="ExtraBold" Foreground="{StaticResource Yolk}" Margin="6,0" VerticalAlignment="Center"/>
+            <TextBlock Text=":" FontSize="40" FontWeight="ExtraBold" Foreground="{DynamicResource Yolk}" Margin="6,0" VerticalAlignment="Center"/>
             <ComboBox x:Name="MinuteBox" Style="{StaticResource TimeCombo}" Width="96" SelectionChanged="Changed"/>
             <ComboBox x:Name="AmPmBox" Style="{StaticResource TimeCombo}" Width="92" FontSize="22" Margin="10,0,0,0" SelectionChanged="Changed">
               <ComboBoxItem Content="AM"/>
@@ -65,7 +65,7 @@
         <StackPanel x:Name="DaysPanel" Orientation="Horizontal" Margin="0,0,0,10"/>
         <StackPanel x:Name="DateRow" Orientation="Horizontal" Margin="0,0,0,10">
           <DatePicker x:Name="OnceDatePicker" Width="200" SelectedDateChanged="Changed"/>
-          <TextBlock x:Name="DateHint" Foreground="{StaticResource Muted}" FontSize="13" VerticalAlignment="Center" Margin="12,0,0,0"/>
+          <TextBlock x:Name="DateHint" Foreground="{DynamicResource Muted}" FontSize="13" VerticalAlignment="Center" Margin="12,0,0,0"/>
         </StackPanel>
 
         <TextBlock Style="{StaticResource SectionLabel}" Text="LABEL" Margin="0,10,0,8"/>
@@ -101,10 +101,24 @@
 
         <TextBlock Style="{StaticResource SectionLabel}" Text="WHEN IT RINGS…"/>
         <Grid Margin="0,0,0,8">
-          <Border Background="White" BorderBrush="#E4DDD2" BorderThickness="1" CornerRadius="12" Padding="4">
-            <ListBox x:Name="ActionsList" Height="110" BorderThickness="0" Background="Transparent" DisplayMemberPath="Description" PreviewMouseWheel="PassWheelToPage"/>
+          <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource FieldLine}" BorderThickness="1" CornerRadius="12" Padding="4">
+            <ListBox x:Name="ActionsList" Height="110" BorderThickness="0" Background="Transparent" PreviewMouseWheel="PassWheelToPage" HorizontalContentAlignment="Stretch">
+              <ListBox.ItemTemplate>
+                <DataTemplate>
+                  <Border Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="8" Padding="6,4"
+                          Cursor="SizeAll" ToolTip="Drag to change the order" AllowDrop="True"
+                          PreviewMouseLeftButtonDown="Action_MouseDown" PreviewMouseMove="Action_MouseMove"
+                          DragOver="Action_DragOver" DragLeave="Action_DragLeave" Drop="Action_Drop">
+                    <DockPanel>
+                      <TextBlock Text="⠿" Foreground="{DynamicResource Muted}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                      <TextBlock Text="{Binding Description}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    </DockPanel>
+                  </Border>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
           </Border>
-          <TextBlock x:Name="NoActionsText" Text="Nothing extra — it just rings.&#x0a;Add a website or app to open automatically." TextAlignment="Center" Foreground="{StaticResource Muted}" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False"/>
+          <TextBlock x:Name="NoActionsText" Text="Nothing extra — it just rings.&#x0a;Add a website or app to open automatically." TextAlignment="Center" Foreground="{DynamicResource Muted}" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False"/>
         </Grid>
         <WrapPanel Margin="0,0,0,8">
           <Button Style="{StaticResource SecondaryButton}" Content="+ Website" Height="36" Margin="0,0,8,8" Click="AddWebsite_Click"/>

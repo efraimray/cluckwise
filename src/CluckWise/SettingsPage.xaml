@@ -4,46 +4,62 @@
   <ScrollViewer VerticalScrollBarVisibility="Auto">
     <StackPanel MaxWidth="760" HorizontalAlignment="Left">
       <TextBlock Text="Settings" FontSize="28" FontWeight="ExtraBold"/>
-      <TextBlock Text="Changes are saved straight away" FontSize="14" Foreground="{StaticResource Muted}" Margin="0,0,0,20"/>
+      <TextBlock Text="Changes are saved straight away" FontSize="14" Foreground="{DynamicResource Muted}" Margin="0,0,0,20"/>
 
       <TextBlock Style="{StaticResource SectionLabel}" Text="GENERAL"/>
-      <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,6" Margin="0,0,0,22">
+      <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,6" Margin="0,0,0,22">
         <StackPanel>
           <DockPanel Margin="0,10">
             <CheckBox x:Name="StartupSwitch" DockPanel.Dock="Right" Style="{StaticResource Switch}" Click="Startup_Click"/>
             <StackPanel VerticalAlignment="Center">
               <TextBlock Text="Start with Windows" FontSize="15" FontWeight="SemiBold"/>
-              <TextBlock Text="Opens quietly in the tray when you sign in, so alarms ring after a restart" FontSize="13" Foreground="{StaticResource Muted}" TextWrapping="Wrap"/>
+              <TextBlock Text="Opens quietly in the tray when you sign in, so alarms ring after a restart" FontSize="13" Foreground="{DynamicResource Muted}" TextWrapping="Wrap"/>
             </StackPanel>
           </DockPanel>
-          <Border Height="1" Background="{StaticResource Line}"/>
+          <Border Height="1" Background="{DynamicResource Line}"/>
+          <DockPanel Margin="0,10">
+            <CheckBox x:Name="DarkSwitch" DockPanel.Dock="Right" Style="{StaticResource Switch}" Click="Dark_Click"/>
+            <StackPanel VerticalAlignment="Center">
+              <TextBlock Text="Dark mode" FontSize="15" FontWeight="SemiBold"/>
+              <TextBlock Text="Easier on the eyes at night" FontSize="13" Foreground="{DynamicResource Muted}"/>
+            </StackPanel>
+          </DockPanel>
+          <Border Height="1" Background="{DynamicResource Line}"/>
+          <DockPanel Margin="0,10">
+            <CheckBox x:Name="Clock24Switch" DockPanel.Dock="Right" Style="{StaticResource Switch}" Click="Clock24_Click"/>
+            <StackPanel VerticalAlignment="Center">
+              <TextBlock Text="24-hour clock" FontSize="15" FontWeight="SemiBold"/>
+              <TextBlock Text="Show 18:30 instead of 6:30 PM" FontSize="13" Foreground="{DynamicResource Muted}"/>
+            </StackPanel>
+          </DockPanel>
+          <Border Height="1" Background="{DynamicResource Line}"/>
           <DockPanel Margin="0,10">
             <CheckBox x:Name="TodoSwitch" DockPanel.Dock="Right" Style="{StaticResource Switch}" Click="Todo_Click"/>
             <StackPanel VerticalAlignment="Center">
               <TextBlock Text="Show morning to-do after morning alarms" FontSize="15" FontWeight="SemiBold"/>
-              <TextBlock Text="When you dismiss an alarm set before noon, show your checklist and streak" FontSize="13" Foreground="{StaticResource Muted}" TextWrapping="Wrap"/>
+              <TextBlock Text="When you dismiss an alarm set before noon, show your checklist and streak" FontSize="13" Foreground="{DynamicResource Muted}" TextWrapping="Wrap"/>
             </StackPanel>
           </DockPanel>
-          <Border Height="1" Background="{StaticResource Line}"/>
+          <Border Height="1" Background="{DynamicResource Line}"/>
           <DockPanel Margin="0,10">
             <StackPanel VerticalAlignment="Center">
               <TextBlock Text="Closing the window" FontSize="15" FontWeight="SemiBold"/>
-              <TextBlock Text="CluckWise keeps running in the tray. Right-click the tray icon and choose Quit to close it fully." FontSize="13" Foreground="{StaticResource Muted}" TextWrapping="Wrap"/>
+              <TextBlock Text="CluckWise keeps running in the tray. Right-click the tray icon and choose Quit to close it fully." FontSize="13" Foreground="{DynamicResource Muted}" TextWrapping="Wrap"/>
             </StackPanel>
           </DockPanel>
         </StackPanel>
       </Border>
 
       <TextBlock Style="{StaticResource SectionLabel}" Text="WORLD CLOCKS"/>
-      <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16" Margin="0,0,0,22">
+      <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16" Margin="0,0,0,22">
         <StackPanel>
           <TextBlock Text="Show other cities' times on the Alarms page" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,10"/>
           <Grid Margin="0,0,0,8">
             <TextBox x:Name="ZoneSearch" Style="{StaticResource Field}" TextChanged="ZoneSearch_TextChanged"/>
-            <TextBlock x:Name="ZoneHint" Text="Search a city or time zone, e.g. Manila, London, Tokyo" Foreground="{StaticResource Muted}"
+            <TextBlock x:Name="ZoneHint" Text="Search a city or time zone, e.g. Manila, London, Tokyo" Foreground="{DynamicResource Muted}"
                        Margin="14,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
           </Grid>
-          <Border BorderBrush="#E4DDD2" BorderThickness="1" CornerRadius="12" Padding="4" Margin="0,0,0,10">
+          <Border BorderBrush="{DynamicResource FieldLine}" BorderThickness="1" CornerRadius="12" Padding="4" Margin="0,0,0,10">
             <ListBox x:Name="ZoneList" MaxHeight="190" BorderThickness="0" Background="Transparent" SelectionChanged="ZoneList_SelectionChanged"/>
           </Border>
           <DockPanel Margin="0,0,0,10">
@@ -53,14 +69,14 @@
           <ItemsControl x:Name="ClockList">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
-                <Border Background="#FBFAF7" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="12,6" Margin="0,3"
+                <Border Background="{DynamicResource SurfaceAlt}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="10" Padding="12,6" Margin="0,3"
                         Cursor="SizeAll" ToolTip="Drag to rearrange" AllowDrop="True"
                         PreviewMouseLeftButtonDown="Clock_MouseDown" PreviewMouseMove="Clock_MouseMove"
                         DragOver="Clock_DragOver" DragLeave="Clock_DragLeave" Drop="Clock_Drop">
                   <DockPanel>
                     <Button DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}" Content="Remove" Height="34" Cursor="Hand" Tag="{Binding}" Click="RemoveClock_Click"/>
-                    <TextBlock Text="⠿" FontSize="16" Foreground="{StaticResource Muted}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBlock VerticalAlignment="Center" FontSize="14"><Run Text="{Binding Label, Mode=OneWay}" FontWeight="SemiBold"/><Run Text="  "/><Run Text="{Binding TimeText, Mode=OneWay}" Foreground="{StaticResource Muted}"/></TextBlock>
+                    <TextBlock Text="⠿" FontSize="16" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock VerticalAlignment="Center" FontSize="14"><Run Text="{Binding Label, Mode=OneWay}" FontWeight="SemiBold"/><Run Text="  "/><Run Text="{Binding TimeText, Mode=OneWay}" Foreground="{DynamicResource Muted}"/></TextBlock>
                   </DockPanel>
                 </Border>
               </DataTemplate>
@@ -70,19 +86,19 @@
       </Border>
 
       <TextBlock Style="{StaticResource SectionLabel}" Text="WAKE FROM SLEEP"/>
-      <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16" Margin="0,0,0,22">
+      <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16" Margin="0,0,0,22">
         <DockPanel>
           <Button DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}" Content="Power settings" VerticalAlignment="Center" Margin="12,0,0,0" Click="Power_Click"/>
           <StackPanel>
             <TextBlock x:Name="WakeStatusText" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"/>
-            <TextBlock FontSize="13" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,0"
+            <TextBlock FontSize="13" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,4,0,0"
                        Text="Windows must allow wake timers: Power settings → Change plan settings → Change advanced power settings → Sleep → Allow wake timers → Enable. Some laptops with Modern Standby can't wake for apps."/>
           </StackPanel>
         </DockPanel>
       </Border>
 
       <TextBlock Style="{StaticResource SectionLabel}" Text="NEW ALARMS START WITH"/>
-      <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16" Margin="0,0,0,22">
+      <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16" Margin="0,0,0,22">
         <StackPanel>
           <TextBlock Text="Sound" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,8"/>
           <DockPanel Margin="0,0,0,16">
@@ -95,14 +111,14 @@
       </Border>
 
       <TextBlock Style="{StaticResource SectionLabel}" Text="ABOUT"/>
-      <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16">
+      <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16">
         <DockPanel>
           <Button DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}" Content="Open data folder" Click="OpenData_Click" VerticalAlignment="Center"/>
           <StackPanel Orientation="Horizontal">
             <Image Source="pack://application:,,,/Assets/logo.png" Width="48" Height="48"/>
             <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
               <TextBlock x:Name="VersionText" FontSize="15" FontWeight="Bold"/>
-              <TextBlock Text="Rise wise." FontSize="13" Foreground="{StaticResource Muted}"/>
+              <TextBlock Text="Rise wise." FontSize="13" Foreground="{DynamicResource Muted}"/>
             </StackPanel>
           </StackPanel>
         </DockPanel>

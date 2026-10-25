@@ -20,7 +20,7 @@ public class WorldClock : Observable
         try { zone = TimeZoneInfo.FindSystemTimeZoneById(TimeZoneId); }
         catch { zone = TimeZoneInfo.Utc; }
         var there = TimeZoneInfo.ConvertTime(nowLocal, TimeZoneInfo.Local, zone);
-        TimeText = there.ToString("h:mm tt");
+        TimeText = TimeFormat.Time(there);
         var diff = (there.Date - nowLocal.Date).Days;
         var offset = there - nowLocal;
         var hours = Math.Round(offset.TotalHours, 1);

@@ -83,8 +83,8 @@ public class Alarm : Observable
         set { if (Set(ref _enabled, value)) Raise(nameof(SummaryText)); }
     }
 
-    [JsonIgnore] public string TimeText => new DateTime(2000, 1, 1, Hour, Minute, 0).ToString("h:mm");
-    [JsonIgnore] public string AmPm => Hour < 12 ? "AM" : "PM";
+    [JsonIgnore] public string TimeText => TimeFormat.Digits(Hour, Minute);
+    [JsonIgnore] public string AmPm => TimeFormat.Suffix(Hour);
 
     [JsonIgnore]
     public string RepeatText => Repeat switch
@@ -202,6 +202,10 @@ public class AppData
     public DateTime TasksDate { get; set; } = DateTime.Today;
     public bool ShowTodoAfterMorningAlarm { get; set; } = true;
     public bool SeededTasks { get; set; }
+    /// <summary>The order of alarm groups on the Alarms page (set by dragging group headings).</summary>
+    public List<string> GroupOrder { get; set; } = new();
+    public bool Use24Hour { get; set; }
+    public bool DarkMode { get; set; }
     public int Streak { get; set; }
     public int BestStreak { get; set; }
     public DateTime? LastOnTimeDate { get; set; }

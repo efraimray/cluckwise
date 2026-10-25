@@ -25,6 +25,8 @@ public partial class SettingsPage : UserControl
         var v = typeof(App).Assembly.GetName().Version;
         VersionText.Text = $"CluckWise {v?.Major}.{v?.Minor}.{v?.Build}";
         TodoSwitch.IsChecked = data.ShowTodoAfterMorningAlarm;
+        Clock24Switch.IsChecked = data.Use24Hour;
+        DarkSwitch.IsChecked = data.DarkMode;
         _zones = CityZones.All();
         FilterZones();
         ClockList.ItemsSource = data.WorldClocks;
@@ -35,7 +37,7 @@ public partial class SettingsPage : UserControl
     public void Refresh()
     {
         WakeStatusText.Text = WakeTimer.ArmedFor is { } at
-            ? $"Your PC is set to wake at {at:dddd h:mm tt} for the next alarm"
+            ? $"Your PC is set to wake at {at:dddd} {TimeFormat.Time(at)} for the next alarm"
             : "No wake-up scheduled (no upcoming alarm has \"Wake the PC\" on)";
         try { StartupSwitch.IsChecked = WindowsStartup.IsEnabled(); } catch { StartupSwitch.IsChecked = false; }
     }
@@ -43,6 +45,23 @@ public partial class SettingsPage : UserControl
     private void Startup_Click(object sender, RoutedEventArgs e)
     {
         App.Current.SetStartWithWindows(StartupSwitch.IsChecked == true);
+        Refresh();
+    }
+
+    private void Dark_Click(object sender, RoutedEventArgs e)
+    {
+        App.Current.Data.DarkMode = DarkSwitch.IsChecked == true;
+        Theme.Apply(App.Current.Data.DarkMode);
+        App.Current.SaveData();
+    }
+
+    private void Clock24_Click(object sender, RoutedEventArgs e)
+    {
+        var data = App.Current.Data;
+        data.Use24Hour = TimeFormat.Use24Hour = Clock24Switch.IsChecked == true;
+        foreach (var a in data.Alarms) a.Refresh();
+        foreach (var c in data.WorldClocks) c.Refresh(DateTime.Now);
+        App.Current.SaveData();
         Refresh();
     }
 

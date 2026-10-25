@@ -4,10 +4,10 @@
   <DockPanel>
     <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
       <TextBlock Text="Birthdays" FontSize="28" FontWeight="ExtraBold"/>
-      <TextBlock Text="A heads-up the day before, and a little celebration at 9 AM on the day" FontSize="14" Foreground="{StaticResource Muted}"/>
+      <TextBlock Text="A heads-up the day before, and a little celebration at 9 AM on the day" FontSize="14" Foreground="{DynamicResource Muted}"/>
     </StackPanel>
 
-    <Border DockPanel.Dock="Top" Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="16" Padding="18,14" Margin="0,0,0,18">
+    <Border DockPanel.Dock="Top" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="16" Padding="18,14" Margin="0,0,0,18">
       <StackPanel>
         <TextBlock Style="{StaticResource SectionLabel}" Text="ADD A BIRTHDAY"/>
         <WrapPanel>
@@ -20,27 +20,27 @@
       </StackPanel>
     </Border>
 
-    <TextBlock x:Name="EmptyText" DockPanel.Dock="Top" Text="No birthdays yet. Add family and friends so you never miss one." Foreground="{StaticResource Muted}"/>
+    <TextBlock x:Name="EmptyText" DockPanel.Dock="Top" Text="No birthdays yet. Add family and friends so you never miss one." Foreground="{DynamicResource Muted}"/>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
       <ItemsControl x:Name="BirthdayList">
         <ItemsControl.ItemTemplate>
           <DataTemplate>
-            <Border x:Name="card" Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="14" Padding="18,12" Margin="0,0,0,8">
+            <Border x:Name="card" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="14" Padding="18,12" Margin="0,0,0,8">
               <DockPanel>
                 <Button DockPanel.Dock="Right" Content="✕" Width="32" Height="32" Background="Transparent" BorderThickness="0"
-                        Foreground="{StaticResource Muted}" Cursor="Hand" ToolTip="Remove" Tag="{Binding}" Click="Remove_Click"/>
+                        Foreground="{DynamicResource Muted}" Cursor="Hand" ToolTip="Remove" Tag="{Binding}" Click="Remove_Click"/>
                 <TextBlock DockPanel.Dock="Right" Text="{Binding Countdown}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,14,0"/>
                 <StackPanel>
                   <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="Bold"/>
-                  <TextBlock Text="{Binding DateText}" FontSize="13" Foreground="{StaticResource Muted}"/>
+                  <TextBlock Text="{Binding DateText}" FontSize="13" Foreground="{DynamicResource Muted}"/>
                 </StackPanel>
               </DockPanel>
             </Border>
             <DataTemplate.Triggers>
               <DataTrigger Binding="{Binding DaysUntil}" Value="0">
-                <Setter TargetName="card" Property="Background" Value="{StaticResource YolkSoft}"/>
-                <Setter TargetName="card" Property="BorderBrush" Value="{StaticResource Yolk}"/>
+                <Setter TargetName="card" Property="Background" Value="{DynamicResource YolkSoft}"/>
+                <Setter TargetName="card" Property="BorderBrush" Value="{DynamicResource Yolk}"/>
               </DataTrigger>
             </DataTemplate.Triggers>
           </DataTemplate>

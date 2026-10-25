@@ -3,24 +3,24 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="CluckWise alarm" Width="420" SizeToContent="Height" ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen" Topmost="True" ShowInTaskbar="True"
-        Background="{StaticResource Ink}">
+        Background="{DynamicResource Ink}">
   <Grid>
   <StackPanel x:Name="RingPanel" Margin="32,28">
     <Image Source="pack://application:,,,/Assets/logo.png" Width="72" Height="72" Margin="0,0,0,10"/>
-    <TextBlock x:Name="HeaderText" Text="TIME TO RISE" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Yolk}" HorizontalAlignment="Center"/>
+    <TextBlock x:Name="HeaderText" Text="TIME TO RISE" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource Yolk}" HorizontalAlignment="Center"/>
     <TextBlock x:Name="TimeText" FontSize="64" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" Margin="0,6,0,0"/>
     <TextBlock x:Name="LabelText" FontSize="20" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
-    <TextBlock x:Name="ActionsText" FontSize="13" Foreground="{StaticResource SideText}" HorizontalAlignment="Center" Margin="0,6,0,0" TextWrapping="Wrap" TextAlignment="Center"/>
+    <TextBlock x:Name="ActionsText" FontSize="13" Foreground="{DynamicResource SideText}" HorizontalAlignment="Center" Margin="0,6,0,0" TextWrapping="Wrap" TextAlignment="Center"/>
     <Button x:Name="DismissButton" Style="{StaticResource PrimaryButton}" Content="Dismiss" Height="52" FontSize="16" Margin="0,24,0,10" Click="Dismiss_Click"/>
     <Button x:Name="SnoozeButton" Style="{StaticResource SecondaryButton}" Height="48" Click="Snooze_Click"/>
     <TextBlock Text="Space to dismiss · S to snooze" FontSize="12" Foreground="#9C9286" HorizontalAlignment="Center" Margin="0,12,0,0"/>
   </StackPanel>
   <StackPanel x:Name="TodoPanel" Margin="32,28" Visibility="Collapsed" TextElement.Foreground="White">
     <Image Source="pack://application:,,,/Assets/logo.png" Width="64" Height="64" Margin="0,0,0,8"/>
-    <TextBlock Text="GOOD MORNING" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Yolk}" HorizontalAlignment="Center"/>
+    <TextBlock Text="GOOD MORNING" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource Yolk}" HorizontalAlignment="Center"/>
     <TextBlock x:Name="StreakText" FontSize="24" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" Margin="0,6,0,2" TextAlignment="Center" TextWrapping="Wrap"/>
-    <TextBlock x:Name="StreakHint" FontSize="13" Foreground="{StaticResource SideText}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,18"/>
-    <Border Background="{StaticResource InkSoft}" CornerRadius="16" Padding="18,12">
+    <TextBlock x:Name="StreakHint" FontSize="13" Foreground="{DynamicResource SideText}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,18"/>
+    <Border Background="{DynamicResource InkSoft}" CornerRadius="16" Padding="18,12">
       <StackPanel>
         <TextBlock Text="Your morning plan" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,0,0,8"/>
         <ItemsControl x:Name="TaskList">

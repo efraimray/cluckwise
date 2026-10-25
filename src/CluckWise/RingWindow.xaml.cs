@@ -13,7 +13,7 @@ public partial class RingWindow : Window
     {
         InitializeComponent();
         _alarm = alarm;
-        TimeText.Text = DateTime.Now.ToString("h:mm tt");
+        TimeText.Text = TimeFormat.Time(DateTime.Now);
         LabelText.Text = alarm.Label;
         ActionsText.Text = alarm.Actions.Count == 0 ? "" : string.Join("\n", alarm.Actions.Select(a => a.Description));
         SnoozeButton.Content = $"Snooze {alarm.SnoozeMinutes} min";
