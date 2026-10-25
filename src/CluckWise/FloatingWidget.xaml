@@ -4,33 +4,8 @@
         Title="CluckWise widget" WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ResizeMode="NoResize" SizeToContent="WidthAndHeight"
         UseLayoutRounding="True" FontFamily="{StaticResource UiFont}" ShowActivated="False">
-  <Window.Resources>
-    <!-- Small round icon button: no Windows chrome, brightens on hover -->
-    <Style x:Key="WidgetIconButton" TargetType="Button">
-      <Setter Property="Width" Value="20"/>
-      <Setter Property="Height" Value="20"/>
-      <Setter Property="Cursor" Value="Hand"/>
-      <Setter Property="Focusable" Value="False"/>
-      <Setter Property="Template">
-        <Setter.Value>
-          <ControlTemplate TargetType="Button">
-            <Border x:Name="b" CornerRadius="10" Background="Transparent">
-              <Path x:Name="x" Data="M0,0 L7,7 M7,0 L0,7" Stroke="{DynamicResource SideText}" StrokeThickness="1.6"
-                    StrokeStartLineCap="Round" StrokeEndLineCap="Round" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.7"/>
-            </Border>
-            <ControlTemplate.Triggers>
-              <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="b" Property="Background" Value="#3A332B"/>
-                <Setter TargetName="x" Property="Opacity" Value="1"/>
-              </Trigger>
-            </ControlTemplate.Triggers>
-          </ControlTemplate>
-        </Setter.Value>
-      </Setter>
-    </Style>
-  </Window.Resources>
 
-  <Border x:Name="Card" Background="{DynamicResource Ink}" CornerRadius="14" Padding="12,8,8,9" Margin="8"
+  <Border x:Name="Card" Background="{DynamicResource Ink}" CornerRadius="14" Padding="12,8,12,9" Margin="8"
           MaxWidth="250" Cursor="SizeAll" MouseLeftButtonDown="Card_MouseLeftButtonDown"
           MouseEnter="Card_MouseEnter" MouseLeave="Card_MouseLeave" ToolTip="Drag to move · double-click to open CluckWise">
     <Border.Effect>
@@ -46,8 +21,6 @@
     </Border.ContextMenu>
     <StackPanel>
       <DockPanel>
-        <Button x:Name="CloseButton" DockPanel.Dock="Right" Style="{StaticResource WidgetIconButton}" VerticalAlignment="Top"
-                Margin="8,0,0,0" ToolTip="Hide widget (turn it back on in Settings or the tray menu)" Click="Hide_Click"/>
         <Image Source="pack://application:,,,/Assets/logo.png" Width="18" Height="18" VerticalAlignment="Center"/>
         <TextBlock x:Name="ClockText" FontSize="18" FontWeight="ExtraBold" Foreground="White" Margin="6,0,0,0" VerticalAlignment="Center"/>
       </DockPanel>
