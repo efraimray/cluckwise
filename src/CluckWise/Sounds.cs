@@ -21,7 +21,11 @@ public static class Sounds
     private const int Rate = 22050;
     private static readonly string Folder = Path.Combine(Storage.Folder, "Sounds");
 
+    private const double GentleStart = 0.35;
+    private const double GentleSeconds = 20;
+
     private static MediaPlayer? _player;
+    private static System.Media.SoundPlayer? _fallback;
     private static DispatcherTimer? _ramp;
 
     /// <summary>A built-in sound name, or the full path of the user's own file.</summary>
@@ -35,9 +39,10 @@ public static class Sounds
         var target = Math.Clamp(volume, 0, 100) / 100.0;
 
         _player = new MediaPlayer();
+        _player.MediaFailed += (_, _) => PlayFallback(path, loop);
         _player.Open(new Uri(path));
         if (loop) _player.MediaEnded += (_, _) => { _player.Position = TimeSpan.Zero; _player.Play(); };
-        _player.Volume = gentle ? target * 0.1 : target;
+        _player.Volume = gentle ? target * GentleStart : target;
         _player.Play();
 
         if (gentle)
@@ -46,16 +51,31 @@ public static class Sounds
             _ramp = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
             _ramp.Tick += (_, _) =>
             {
-                var t = Math.Min(1.0, (DateTime.Now - started).TotalSeconds / 30.0);
-                if (_player != null) _player.Volume = target * (0.1 + 0.9 * t);
+                var t = Math.Min(1.0, (DateTime.Now - started).TotalSeconds / GentleSeconds);
+                if (_player != null) _player.Volume = target * (GentleStart + (1 - GentleStart) * t);
                 if (t >= 1.0) _ramp?.Stop();
             };
             _ramp.Start();
         }
     }
 
+    /// <summary>Plain WAV playback without volume control, used if MediaPlayer fails (e.g. Windows N without the Media Feature Pack).</summary>
+    private static void PlayFallback(string path, bool loop)
+    {
+        try
+        {
+            if (!path.EndsWith(".wav", StringComparison.OrdinalIgnoreCase)) path = ResolvePath(RoosterCrow);
+            _fallback?.Stop();
+            _fallback = new System.Media.SoundPlayer(path);
+            if (loop) _fallback.PlayLooping(); else _fallback.Play();
+        }
+        catch { System.Media.SystemSounds.Exclamation.Play(); }
+    }
+
     public static void Stop()
     {
+        _fallback?.Stop();
+        _fallback = null;
         _ramp?.Stop();
         _ramp = null;
         if (_player != null)
@@ -75,7 +95,7 @@ public static class Sounds
         }
 
         Directory.CreateDirectory(Folder);
-        var path = Path.Combine(Folder, sound.Replace(" ", "") + ".wav");
+        var path = Path.Combine(Folder, sound.Replace(" ", "") + ".v2.wav");
         if (!File.Exists(path)) WriteWav(path, Synthesize(sound));
         return path;
     }
@@ -175,6 +195,10 @@ public static class Sounds
 
     private static void WriteWav(string path, float[] samples)
     {
+        // Normalise so every built-in sound peaks at about 90% (the originals were too quiet).
+        float peak = samples.Length == 0 ? 0 : samples.Max(x => Math.Abs(x));
+        if (peak > 0) for (int i = 0; i < samples.Length; i++) samples[i] = samples[i] / peak * 0.9f;
+
         using var w = new BinaryWriter(File.Create(path));
         int dataBytes = samples.Length * 2;
         w.Write("RIFF"u8.ToArray()); w.Write(36 + dataBytes); w.Write("WAVE"u8.ToArray());
