@@ -172,6 +172,10 @@
                 <Setter TargetName="b" Property="BorderBrush" Value="{DynamicResource Ink}"/>
                 <Setter Property="Foreground" Value="White"/>
               </Trigger>
+                          <Trigger Property="Tag" Value="today">
+                <Setter TargetName="b" Property="BorderBrush" Value="{DynamicResource Yolk}"/>
+                <Setter TargetName="b" Property="BorderThickness" Value="2"/>
+              </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
         </Setter.Value>

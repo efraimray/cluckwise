@@ -37,10 +37,20 @@ public partial class AlarmEditorPanel : UserControl
         else for (int h = 1; h <= 12; h++) HourBox.Items.Add(h.ToString());
         AmPmBox.Visibility = TimeFormat.Use24Hour ? Visibility.Collapsed : Visibility.Visible;
         for (int m = 0; m < 60; m++) MinuteBox.Items.Add(m.ToString("00"));
-        string[] letters = { "S", "M", "T", "W", "T", "F", "S" };
+        string[] letters = { "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" };
+        string[] names = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
         for (int i = 0; i < 7; i++)
         {
-            _days[i] = new ToggleButton { Content = letters[i], Style = (Style)FindResource("DayChip"), Margin = new Thickness(0, 0, 6, 0) };
+            bool isToday = i == (int)DateTime.Today.DayOfWeek;
+            _days[i] = new ToggleButton
+            {
+                Content = letters[i],
+                Style = (Style)FindResource("DayChip"),
+                Margin = new Thickness(0, 0, 6, 0),
+                ToolTip = names[i] + (isToday ? " (today)" : ""),
+            };
+            // Mark today with a yellow outline so it's clear which day is which.
+            if (isToday) _days[i].Tag = "today";
             _days[i].Click += (_, _) => UpdateState();
             DaysPanel.Children.Add(_days[i]);
         }
