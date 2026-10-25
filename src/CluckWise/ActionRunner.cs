@@ -28,6 +28,19 @@ public static class ActionRunner
                     Open(url);
                     return null;
 
+                case ActionKind.LockPC:
+                    return NativeMethods.LockWorkStation() ? null : "Windows didn't allow locking the PC.";
+
+                case ActionKind.ScreenOff:
+                    // Give the ringing popup a moment to appear before the screen goes dark.
+                    Delay(TimeSpan.FromSeconds(2), NativeMethods.MonitorOff);
+                    return null;
+
+                case ActionKind.Sleep:
+                    new SleepCountdownWindow().Show();
+                    return null;
+
+                case ActionKind.PlayMusic:
                 case ActionKind.OpenProgram:
                     var path = Environment.ExpandEnvironmentVariables(action.Target.Trim().Trim('"'));
                     if (!File.Exists(path) && !Directory.Exists(path)) return $"\"{action.Target}\" wasn't found.";
@@ -52,6 +65,13 @@ public static class ActionRunner
                && uri.Host.Contains('.')
             ? uri.ToString()
             : null;
+    }
+
+    private static void Delay(TimeSpan wait, Action then)
+    {
+        var t = new System.Windows.Threading.DispatcherTimer { Interval = wait };
+        t.Tick += (_, _) => { t.Stop(); then(); };
+        t.Start();
     }
 
     private static void Open(string target) =>

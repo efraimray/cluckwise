@@ -113,6 +113,7 @@ public partial class RingWindow : Window
     {
         _handled = true;
         Sounds.Stop();
+        NativeMethods.KeepAwake(false);
         App.Current.SaveData();
         Close();
     }
@@ -120,7 +121,7 @@ public partial class RingWindow : Window
     protected override void OnClosing(CancelEventArgs e)
     {
         // Closing with the X counts as Dismiss so the sound never keeps playing.
-        if (!_handled) { Sounds.Stop(); _timer?.Reset(); App.Current.SaveData(); }
+        if (!_handled) { Sounds.Stop(); NativeMethods.KeepAwake(false); _timer?.Reset(); App.Current.SaveData(); }
         base.OnClosing(e);
     }
 }

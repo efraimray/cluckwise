@@ -23,7 +23,7 @@ public abstract class Observable : INotifyPropertyChanged
 
 public enum RepeatMode { Once, Daily, Weekly }
 
-public enum ActionKind { OpenWebsite, OpenProgram }
+public enum ActionKind { OpenWebsite, OpenProgram, PlayMusic, LockPC, ScreenOff, Sleep }
 
 public class AlarmAction
 {
@@ -34,6 +34,10 @@ public class AlarmAction
     public string Description => Kind switch
     {
         ActionKind.OpenWebsite => $"Open website: {Target}",
+        ActionKind.PlayMusic => $"Play: {System.IO.Path.GetFileName(Target)}",
+        ActionKind.LockPC => "Lock the PC",
+        ActionKind.ScreenOff => "Turn off the screen",
+        ActionKind.Sleep => "Put the PC to sleep (after a 30-second countdown)",
         _ => $"Open: {Target}",
     };
 }
@@ -61,6 +65,13 @@ public class Alarm : Observable
     public bool GentleWake { get; set; } = true;
     public int SnoozeMinutes { get; set; } = 9;
     public bool RunSilently { get; set; }
+    public bool WakeComputer { get; set; } = true;
+
+    /// <summary>Minutes before the alarm to show a quiet heads-up (0 = off).</summary>
+    public int ReminderMinutes { get; set; }
+
+    /// <summary>The alarm time a reminder was last shown for, so it only shows once.</summary>
+    public DateTime? LastReminderFor { get; set; }
     public List<AlarmAction> Actions { get; set; } = new();
 
     public DateTime? LastRung { get; set; }
@@ -161,6 +172,8 @@ public class Alarm : Observable
         GentleWake = o.GentleWake;
         SnoozeMinutes = o.SnoozeMinutes;
         RunSilently = o.RunSilently;
+        WakeComputer = o.WakeComputer;
+        ReminderMinutes = o.ReminderMinutes;
         Actions = o.Actions.Select(a => new AlarmAction { Kind = a.Kind, Target = a.Target }).ToList();
         Enabled = o.Enabled;
         Refresh();

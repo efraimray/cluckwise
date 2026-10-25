@@ -15,6 +15,9 @@ public class Scheduler
     public event Action<Alarm>? AlarmDue;
     public event Action? Ticked;
     public event Action<CountdownTimer>? TimerDone;
+    /// <summary>Raised once, N minutes before an alarm that has a reminder set.</summary>
+    public event Action<Alarm, DateTime>? ReminderDue;
+    private DateTime _lastWakeUpdate = DateTime.MinValue;
 
     public Scheduler(AppData data)
     {
@@ -48,6 +51,24 @@ public class Scheduler
 
         foreach (var timer in _data.Timers.ToList())
             if (timer.Tick(now)) TimerDone?.Invoke(timer);
+
+        foreach (var alarm in _data.Alarms.ToList())
+        {
+            if (!alarm.Enabled || alarm.IsNew || alarm.ReminderMinutes <= 0) continue;
+            if (NextOccurrence(alarm, now) is not { } next) continue;
+            var remindAt = next.AddMinutes(-alarm.ReminderMinutes);
+            if (now >= remindAt && now < next && alarm.LastReminderFor != next)
+            {
+                alarm.LastReminderFor = next;
+                ReminderDue?.Invoke(alarm, next);
+            }
+        }
+
+        if (now - _lastWakeUpdate > TimeSpan.FromSeconds(30))
+        {
+            _lastWakeUpdate = now;
+            WakeTimer.Update(_data);
+        }
 
         Morning.ResetIfNewDay(_data);
         _lastCheck = now;

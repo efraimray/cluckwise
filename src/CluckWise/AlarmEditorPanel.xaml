@@ -78,10 +78,13 @@
           <Slider x:Name="VolumeSlider" Minimum="0" Maximum="100" ValueChanged="Volume_Changed"/>
         </DockPanel>
         <CheckBox x:Name="GentleBox" Content="Gentle wake-up (volume rises over 30 seconds)" Margin="0,0,0,8"/>
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
-          <TextBlock Text="Snooze for" VerticalAlignment="Center" Margin="0,0,10,0"/>
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+          <TextBlock Text="Snooze for" VerticalAlignment="Center" Width="90"/>
           <ComboBox x:Name="SnoozeBox" Width="130"/>
+          <TextBlock Text="Remind me" VerticalAlignment="Center" Margin="20,0,10,0"/>
+          <ComboBox x:Name="ReminderBox" Width="140"/>
         </StackPanel>
+        <CheckBox x:Name="WakeBox" Content="Wake the PC from sleep for this alarm" Margin="0,0,0,18"/>
 
         <TextBlock Style="{StaticResource SectionLabel}" Text="WHEN IT RINGS…"/>
         <Grid Margin="0,0,0,8">
@@ -93,6 +96,16 @@
         <WrapPanel Margin="0,0,0,8">
           <Button Style="{StaticResource SecondaryButton}" Content="+ Website" Height="36" Margin="0,0,8,8" Click="AddWebsite_Click"/>
           <Button Style="{StaticResource SecondaryButton}" Content="+ App or file" Height="36" Margin="0,0,8,8" Click="AddProgram_Click"/>
+          <Button Style="{StaticResource SecondaryButton}" Content="+ Music" Height="36" Margin="0,0,8,8" Click="AddMusic_Click" ToolTip="Play a song or playlist file"/>
+          <Button x:Name="PcActionButton" Style="{StaticResource SecondaryButton}" Content="+ PC action ▾" Height="36" Margin="0,0,8,8" Click="PcAction_Click">
+            <Button.ContextMenu>
+              <ContextMenu>
+                <MenuItem Header="Lock the PC" Tag="LockPC" Click="PcActionItem_Click"/>
+                <MenuItem Header="Turn off the screen" Tag="ScreenOff" Click="PcActionItem_Click"/>
+                <MenuItem Header="Put the PC to sleep" Tag="Sleep" Click="PcActionItem_Click"/>
+              </ContextMenu>
+            </Button.ContextMenu>
+          </Button>
           <Button Style="{StaticResource SecondaryButton}" Content="Test" Height="36" Margin="0,0,8,8" Click="TestAction_Click"/>
           <Button Style="{StaticResource SecondaryButton}" Content="Remove" Height="36" Margin="0,0,8,8" Click="RemoveAction_Click"/>
         </WrapPanel>

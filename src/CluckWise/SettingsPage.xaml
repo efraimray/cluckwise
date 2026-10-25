@@ -34,6 +34,18 @@
         </StackPanel>
       </Border>
 
+      <TextBlock Style="{StaticResource SectionLabel}" Text="WAKE FROM SLEEP"/>
+      <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16" Margin="0,0,0,22">
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}" Content="Power settings" VerticalAlignment="Center" Margin="12,0,0,0" Click="Power_Click"/>
+          <StackPanel>
+            <TextBlock x:Name="WakeStatusText" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"/>
+            <TextBlock FontSize="13" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,0"
+                       Text="Windows must allow wake timers: Power settings → Change plan settings → Change advanced power settings → Sleep → Allow wake timers → Enable. Some laptops with Modern Standby can't wake for apps."/>
+          </StackPanel>
+        </DockPanel>
+      </Border>
+
       <TextBlock Style="{StaticResource SectionLabel}" Text="NEW ALARMS START WITH"/>
       <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16" Margin="0,0,0,22">
         <StackPanel>

@@ -99,6 +99,7 @@ public partial class MainWindow : Window
         System.Windows.Data.CollectionViewSource.GetDefaultView(AlarmList.ItemsSource).Refresh();
         App.Current.SaveData();
         UpdateNext();
+        WakeTimer.Update(App.Current.Data);
     }
 
     public void EditorDeleted(Alarm alarm)

@@ -29,6 +29,9 @@ public partial class SettingsPage : UserControl
 
     public void Refresh()
     {
+        WakeStatusText.Text = WakeTimer.ArmedFor is { } at
+            ? $"Your PC is set to wake at {at:dddd h:mm tt} for the next alarm"
+            : "No wake-up scheduled (no upcoming alarm has \"Wake the PC\" on)";
         try { StartupSwitch.IsChecked = WindowsStartup.IsEnabled(); } catch { StartupSwitch.IsChecked = false; }
     }
 
@@ -74,6 +77,9 @@ public partial class SettingsPage : UserControl
         _playing = false;
         PlayButton.Content = "Play";
     }
+
+    private void Power_Click(object sender, RoutedEventArgs e) =>
+        Process.Start(new ProcessStartInfo("control.exe", "powercfg.cpl") { UseShellExecute = true })?.Dispose();
 
     private void OpenData_Click(object sender, RoutedEventArgs e)
     {

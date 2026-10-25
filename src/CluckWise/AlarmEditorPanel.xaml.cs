@@ -46,6 +46,8 @@ public partial class AlarmEditorPanel : UserControl
         foreach (var s in Sounds.BuiltIn) SoundBox.Items.Add(s);
         if (!Sounds.BuiltIn.Contains(_edit.Sound)) SoundBox.Items.Add(_edit.Sound);
         foreach (var n in new[] { 1, 3, 5, 9, 10, 15, 20, 30 }) SnoozeBox.Items.Add($"{n} min");
+        ReminderBox.Items.Add("Off");
+        foreach (var n in new[] { 5, 10, 15, 30, 60 }) ReminderBox.Items.Add($"{n} min before");
 
         HourBox.SelectedIndex = (_edit.Hour % 12 == 0 ? 12 : _edit.Hour % 12) - 1;
         MinuteBox.SelectedIndex = _edit.Minute;
@@ -63,6 +65,9 @@ public partial class AlarmEditorPanel : UserControl
         SnoozeBox.SelectedItem = $"{_edit.SnoozeMinutes} min";
         if (SnoozeBox.SelectedIndex < 0) SnoozeBox.SelectedItem = "9 min";
         SilentBox.IsChecked = _edit.RunSilently;
+        ReminderBox.SelectedItem = _edit.ReminderMinutes > 0 ? $"{_edit.ReminderMinutes} min before" : "Off";
+        if (ReminderBox.SelectedIndex < 0) ReminderBox.SelectedIndex = 0;
+        WakeBox.IsChecked = _edit.WakeComputer;
         EnabledBox.IsChecked = isNew || _edit.Enabled;
         RefreshActions();
 
@@ -133,6 +138,34 @@ public partial class AlarmEditorPanel : UserControl
         RefreshActions();
     }
 
+    private void AddMusic_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Choose a song or playlist to play",
+            Filter = "Music and playlists|*.mp3;*.m4a;*.wav;*.wma;*.flac;*.m3u;*.m3u8;*.wpl;*.pls|All files|*.*",
+        };
+        if (dlg.ShowDialog(Window.GetWindow(this)) != true) return;
+        _actions.Add(new AlarmAction { Kind = ActionKind.PlayMusic, Target = dlg.FileName });
+        RefreshActions();
+    }
+
+    private void PcAction_Click(object sender, RoutedEventArgs e)
+    {
+        var menu = PcActionButton.ContextMenu;
+        menu.PlacementTarget = PcActionButton;
+        menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+        menu.IsOpen = true;
+    }
+
+    private void PcActionItem_Click(object sender, RoutedEventArgs e)
+    {
+        var kind = Enum.Parse<ActionKind>((string)((MenuItem)sender).Tag);
+        if (_actions.Any(a => a.Kind == kind)) return;
+        _actions.Add(new AlarmAction { Kind = kind });
+        RefreshActions();
+    }
+
     private void TestAction_Click(object sender, RoutedEventArgs e)
     {
         if (ActionsList.SelectedItem is not AlarmAction a) { MessageBox.Show(Window.GetWindow(this), "Select an action to test.", "CluckWise"); return; }
@@ -167,6 +200,8 @@ public partial class AlarmEditorPanel : UserControl
         _edit.GentleWake = GentleBox.IsChecked == true;
         _edit.SnoozeMinutes = int.Parse(((string)SnoozeBox.SelectedItem).Split(' ')[0]);
         _edit.RunSilently = SilentBox.IsChecked == true;
+        _edit.WakeComputer = WakeBox.IsChecked == true;
+        _edit.ReminderMinutes = ReminderBox.SelectedIndex <= 0 ? 0 : int.Parse(((string)ReminderBox.SelectedItem).Split(' ')[0]);
         _edit.Enabled = EnabledBox.IsChecked == true;
         _edit.Actions = _actions.ToList();
         Main.EditorSaved(_original, _edit);

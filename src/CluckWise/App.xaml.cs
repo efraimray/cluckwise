@@ -42,6 +42,12 @@ public partial class App : Application
         Morning.ResetIfNewDay(Data);
         Scheduler = new Scheduler(Data);
         Scheduler.AlarmDue += OnAlarmDue;
+        Scheduler.ReminderDue += (alarm, when) =>
+        {
+            SaveData();
+            var mins = Math.Max(1, (int)Math.Round((when - DateTime.Now).TotalMinutes));
+            ShowTrayMessage($"Coming up: {alarm.Label}", $"Rings at {when:h:mm tt} (in {mins} min)");
+        };
         Scheduler.TimerDone += t => { SaveData(); new RingWindow(t).Show(); };
         // Timers that finished while CluckWise was closed show as done straight away.
         foreach (var t in Data.Timers) if (t.Running) t.Tick(DateTime.Now);
@@ -70,6 +76,7 @@ public partial class App : Application
             ShowTrayMessage(alarm.Label, "Actions ran at " + DateTime.Now.ToString("h:mm tt"));
             return;
         }
+        NativeMethods.KeepAwake(true);
         new RingWindow(alarm).Show();
     }
 

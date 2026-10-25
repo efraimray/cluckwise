@@ -15,6 +15,9 @@
 - **Morning to-do and streak**: dismiss a morning alarm to see your daily checklist. Mornings without snoozing build your streak.
 - **Timers**: several countdowns at once, with quick presets (1, 5, 10, 25 min focus, 1 hour).
 - **Stopwatch** with laps.
+- **Wakes the PC from sleep** for alarms (when Windows allows wake timers).
+- **Reminders before alarms**: a quiet heads-up 5–60 minutes before an alarm rings.
+- **PC actions**: lock the PC, turn off the screen, sleep (with a cancellable countdown) or play a song or playlist when an alarm rings.
 - **Runs in the tray** and can **start with Windows**, so alarms ring after a restart.
 - **Keyboard shortcuts**: Space to dismiss, S to snooze, Ctrl+N for a new alarm, Esc to close a card.
 
@@ -53,9 +56,9 @@ Alarms, timers and settings are saved to `%AppData%\CluckWise\data.json`. Settin
 
 ## Roadmap
 
-- [ ] Wake the PC from sleep for alarms
-- [ ] Reminders before alarms
-- [ ] More actions (lock, sleep, turn off monitor)
+- [x] Wake the PC from sleep for alarms
+- [x] Reminders before alarms
+- [x] More actions (lock, sleep, turn off screen, play music)
 - [ ] Dark mode
 - [ ] Installer and code signing
 
