@@ -23,7 +23,7 @@ public partial class AlarmEditorPanel : UserControl
     {
         if (_initialized || DataContext is not Alarm alarm) return;
         _initialized = true;
-        Init(alarm, alarm.IsNew, App.Current.Data.GroupOrder.Concat(App.Current.Data.Alarms.Where(a => !a.IsNew).Select(a => a.Group)).Distinct(StringComparer.OrdinalIgnoreCase));
+        Init(alarm, alarm.IsNew, Groups.All(App.Current.Data));
     }
 
     private void Init(Alarm alarm, bool isNew, IEnumerable<string> groups)
@@ -44,7 +44,7 @@ public partial class AlarmEditorPanel : UserControl
             _days[i].Click += (_, _) => UpdateState();
             DaysPanel.Children.Add(_days[i]);
         }
-        foreach (var g in groups.Concat(new[] { "Morning", "Work", "Exercise" }).Distinct()) GroupBox.Items.Add(g);
+        foreach (var g in groups.Concat(new[] { Groups.Default }).Distinct(StringComparer.OrdinalIgnoreCase)) GroupBox.Items.Add(g);
         foreach (var s in Sounds.BuiltIn) SoundBox.Items.Add(s);
         if (!Sounds.BuiltIn.Contains(_edit.Sound)) SoundBox.Items.Add(_edit.Sound);
         foreach (var n in new[] { 1, 3, 5, 9, 10, 15, 20, 30 }) SnoozeBox.Items.Add($"{n} min");
@@ -345,7 +345,7 @@ public partial class AlarmEditorPanel : UserControl
             return;
         }
         _edit.Label = string.IsNullOrWhiteSpace(LabelBox.Text) ? "Alarm" : LabelBox.Text.Trim();
-        _edit.Group = string.IsNullOrWhiteSpace(GroupBox.Text) ? "Other" : GroupBox.Text.Trim();
+        _edit.Group = string.IsNullOrWhiteSpace(GroupBox.Text) ? Groups.Default : GroupBox.Text.Trim();
         _edit.Sound = SoundBox.SelectedItem as string ?? Sounds.RoosterCrow;
         _edit.Volume = (int)VolumeSlider.Value;
         _edit.GentleWake = GentleBox.IsChecked == true;

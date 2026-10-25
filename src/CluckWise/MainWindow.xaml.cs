@@ -221,6 +221,18 @@ public partial class MainWindow : Window
         view.Refresh();
     }
 
+    public void RefreshList()
+    {
+        System.Windows.Data.CollectionViewSource.GetDefaultView(AlarmList.ItemsSource).Refresh();
+        UpdateNext();
+    }
+
+    private void DeleteGroup_Click(object sender, RoutedEventArgs e)
+    {
+        if (((FrameworkElement)sender).DataContext is System.Windows.Data.CollectionViewGroup g)
+            Groups.ConfirmAndDelete(App.Current.Data, g.Name?.ToString() ?? "");
+    }
+
     public void RefreshStartupSwitch() => SettingsView?.Refresh();
 
     private void Switch_Click(object sender, RoutedEventArgs e)

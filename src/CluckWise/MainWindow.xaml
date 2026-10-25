@@ -101,9 +101,14 @@
           <GroupStyle.HeaderTemplate>
             <DataTemplate>
               <Border Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="8" Padding="6,4" Margin="-4,8,0,4"
-                      HorizontalAlignment="Left" Cursor="SizeAll" ToolTip="Drag to reorder groups" AllowDrop="True"
+                      HorizontalAlignment="Left" Cursor="SizeAll" ToolTip="Drag to reorder · right-click to delete" AllowDrop="True"
                       PreviewMouseLeftButtonDown="Group_MouseDown" PreviewMouseMove="Group_MouseMove"
                       DragOver="Group_DragOver" DragLeave="Group_DragLeave" Drop="Group_Drop">
+                <Border.ContextMenu>
+                  <ContextMenu>
+                    <MenuItem Header="Delete group…" Click="DeleteGroup_Click"/>
+                  </ContextMenu>
+                </Border.ContextMenu>
                 <StackPanel Orientation="Horizontal">
                   <Ellipse Width="10" Height="10" Fill="{DynamicResource Yolk}" VerticalAlignment="Center"/>
                   <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource Muted}" Margin="8,0,0,0"/>

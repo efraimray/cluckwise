@@ -50,6 +50,26 @@
         </StackPanel>
       </Border>
 
+      <TextBlock Style="{StaticResource SectionLabel}" Text="ALARM GROUPS"/>
+      <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16" Margin="0,0,0,22">
+        <StackPanel>
+          <TextBlock Text="Deleting a group moves its alarms to “Others”. Drag group headings on the Alarms page to reorder them." FontSize="13" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,0,0,10"/>
+          <ItemsControl x:Name="GroupList">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Background="{DynamicResource SurfaceAlt}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="10" Padding="12,6" Margin="0,3">
+                  <DockPanel>
+                    <Button DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}" Content="Delete" Height="34" Tag="{Binding Name}"
+                            IsEnabled="{Binding CanDelete}" Click="DeleteGroup_Click"/>
+                    <TextBlock VerticalAlignment="Center" FontSize="14"><Run Text="{Binding Name, Mode=OneWay}" FontWeight="SemiBold"/><Run Text="  "/><Run Text="{Binding CountText, Mode=OneWay}" Foreground="{DynamicResource Muted}"/></TextBlock>
+                  </DockPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
       <TextBlock Style="{StaticResource SectionLabel}" Text="WORLD CLOCKS"/>
       <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16" Margin="0,0,0,22">
         <StackPanel>

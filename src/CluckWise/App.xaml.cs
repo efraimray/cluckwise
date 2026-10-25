@@ -116,6 +116,8 @@ public partial class App : Application
         SaveData();
     }
 
+    public void RefreshAlarmList() => _main?.RefreshList();
+
     public void ShowMain()
     {
         _main ??= new MainWindow();

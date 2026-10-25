@@ -34,8 +34,26 @@ public partial class SettingsPage : UserControl
         IsVisibleChanged += (_, _) => { if (IsVisible) Refresh(); else StopPreview(); };
     }
 
+    private record GroupRow(string Name, string CountText, bool CanDelete);
+
+    private void RefreshGroups()
+    {
+        var data = App.Current.Data;
+        GroupList.ItemsSource = Groups.All(data).Select(g =>
+        {
+            int n = Groups.AlarmCount(data, g);
+            return new GroupRow(g, n == 1 ? "1 alarm" : $"{n} alarms", Groups.CanDelete(g));
+        }).ToList();
+    }
+
+    private void DeleteGroup_Click(object sender, RoutedEventArgs e)
+    {
+        if (((FrameworkElement)sender).Tag is string g && Groups.ConfirmAndDelete(App.Current.Data, g)) RefreshGroups();
+    }
+
     public void Refresh()
     {
+        RefreshGroups();
         WakeStatusText.Text = WakeTimer.ArmedFor is { } at
             ? $"Your PC is set to wake at {at:dddd} {TimeFormat.Time(at)} for the next alarm"
             : "No wake-up scheduled (no upcoming alarm has \"Wake the PC\" on)";
