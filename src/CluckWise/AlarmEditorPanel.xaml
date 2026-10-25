@@ -97,7 +97,7 @@
         <TextBlock Style="{StaticResource SectionLabel}" Text="WHEN IT RINGS…"/>
         <Grid Margin="0,0,0,8">
           <Border Background="White" BorderBrush="#E4DDD2" BorderThickness="1" CornerRadius="12" Padding="4">
-            <ListBox x:Name="ActionsList" Height="110" BorderThickness="0" Background="Transparent" DisplayMemberPath="Description"/>
+            <ListBox x:Name="ActionsList" Height="110" BorderThickness="0" Background="Transparent" DisplayMemberPath="Description" PreviewMouseWheel="PassWheelToPage"/>
           </Border>
           <TextBlock x:Name="NoActionsText" Text="Nothing extra — it just rings.&#x0a;Add a website or app to open automatically." TextAlignment="Center" Foreground="{StaticResource Muted}" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False"/>
         </Grid>

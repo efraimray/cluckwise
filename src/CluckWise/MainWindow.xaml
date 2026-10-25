@@ -59,7 +59,7 @@
     </Border>
     <ListBox x:Name="AlarmList" BorderThickness="0" Background="Transparent"
              HorizontalContentAlignment="Stretch"
-             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+             ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False">
       <ListBox.Resources>
         <Style x:Key="Chip" TargetType="Border">
           <Setter Property="Width" Value="26"/>

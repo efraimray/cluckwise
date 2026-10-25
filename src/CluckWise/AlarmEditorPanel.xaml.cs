@@ -89,6 +89,38 @@ public partial class AlarmEditorPanel : UserControl
         RightColumn.Margin = narrow ? new Thickness(0, 24, 0, 0) : new Thickness(0);
     }
 
+    /// <summary>
+    /// The actions list has its own scroll area; unless it really has more to scroll,
+    /// hand the mouse wheel to the main page so scrolling never "gets stuck" here.
+    /// </summary>
+    private void PassWheelToPage(object sender, System.Windows.Input.MouseWheelEventArgs e)
+    {
+        var inner = FindChild<ScrollViewer>((DependencyObject)sender);
+        if (inner != null)
+        {
+            bool canScroll = e.Delta > 0 ? inner.VerticalOffset > 0 : inner.VerticalOffset < inner.ScrollableHeight;
+            if (canScroll) return;
+        }
+        e.Handled = true;
+        var forward = new System.Windows.Input.MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
+        {
+            RoutedEvent = UIElement.MouseWheelEvent,
+            Source = sender,
+        };
+        ((UIElement)((FrameworkElement)sender).Parent).RaiseEvent(forward);
+    }
+
+    private static T? FindChild<T>(DependencyObject parent) where T : DependencyObject
+    {
+        for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+            if (child is T found) return found;
+            if (FindChild<T>(child) is { } deeper) return deeper;
+        }
+        return null;
+    }
+
     private void Changed(object sender, RoutedEventArgs e) => UpdateState();
 
     /// <summary>Copies the form into the working copy and refreshes the summary line.</summary>
