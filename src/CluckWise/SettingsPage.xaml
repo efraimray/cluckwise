@@ -53,10 +53,16 @@
           <ItemsControl x:Name="ClockList">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
-                <DockPanel Margin="0,4">
-                  <Button DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}" Content="Remove" Height="34" Tag="{Binding}" Click="RemoveClock_Click"/>
-                  <TextBlock VerticalAlignment="Center" FontSize="14"><Run Text="{Binding Label, Mode=OneWay}" FontWeight="SemiBold"/><Run Text="  "/><Run Text="{Binding TimeText, Mode=OneWay}" Foreground="{StaticResource Muted}"/></TextBlock>
-                </DockPanel>
+                <Border Background="#FBFAF7" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="12,6" Margin="0,3"
+                        Cursor="SizeAll" ToolTip="Drag to rearrange" AllowDrop="True"
+                        PreviewMouseLeftButtonDown="Clock_MouseDown" PreviewMouseMove="Clock_MouseMove"
+                        DragOver="Clock_DragOver" DragLeave="Clock_DragLeave" Drop="Clock_Drop">
+                  <DockPanel>
+                    <Button DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}" Content="Remove" Height="34" Cursor="Hand" Tag="{Binding}" Click="RemoveClock_Click"/>
+                    <TextBlock Text="⠿" FontSize="16" Foreground="{StaticResource Muted}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock VerticalAlignment="Center" FontSize="14"><Run Text="{Binding Label, Mode=OneWay}" FontWeight="SemiBold"/><Run Text="  "/><Run Text="{Binding TimeText, Mode=OneWay}" Foreground="{StaticResource Muted}"/></TextBlock>
+                  </DockPanel>
+                </Border>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>

@@ -64,7 +64,10 @@
       </ItemsControl.ItemsPanel>
       <ItemsControl.ItemTemplate>
         <DataTemplate>
-          <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="14" Padding="16,10" Margin="0,0,10,8" MinWidth="150">
+          <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="14" Padding="16,10" Margin="0,0,10,8" MinWidth="150"
+                  Cursor="SizeAll" ToolTip="Drag to rearrange" AllowDrop="True"
+                  PreviewMouseLeftButtonDown="Clock_MouseDown" PreviewMouseMove="Clock_MouseMove"
+                  DragOver="Clock_DragOver" DragLeave="Clock_DragLeave" Drop="Clock_Drop">
             <StackPanel>
               <TextBlock Text="{Binding Label}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource Muted}"/>
               <TextBlock Text="{Binding TimeText}" FontSize="22" FontWeight="ExtraBold"/>

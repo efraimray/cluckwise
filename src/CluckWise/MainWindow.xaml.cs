@@ -187,6 +187,16 @@ public partial class MainWindow : Window
 
     private void StreakCard_Click(object sender, MouseButtonEventArgs e) => NavMorning.IsChecked = true;
 
+    // Drag a world clock card onto another to rearrange them.
+    private void Clock_MouseDown(object sender, MouseButtonEventArgs e) => DragReorder.MouseDown(sender, e);
+    private void Clock_MouseMove(object sender, MouseEventArgs e) => DragReorder.MouseMove(sender, e);
+    private void Clock_DragOver(object sender, DragEventArgs e) => DragReorder.DragOver(sender, e);
+    private void Clock_DragLeave(object sender, DragEventArgs e) => DragReorder.DragLeave(sender, e);
+    private void Clock_Drop(object sender, DragEventArgs e)
+    {
+        if (DragReorder.Drop(sender, e)) App.Current.SaveData();
+    }
+
     public void RefreshStartupSwitch() => SettingsView?.Refresh();
 
     private void Switch_Click(object sender, RoutedEventArgs e)

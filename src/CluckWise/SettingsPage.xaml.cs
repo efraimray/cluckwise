@@ -116,6 +116,27 @@ public partial class SettingsPage : UserControl
         ZoneList.SelectedIndex = -1;
     }
 
+    private void Clock_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        // Let the Remove button work normally.
+        if (e.OriginalSource is DependencyObject d && FindAncestor<Button>(d) != null) { DragReorder.Cancel(); return; }
+        DragReorder.MouseDown(sender, e);
+    }
+    private void Clock_MouseMove(object sender, System.Windows.Input.MouseEventArgs e) => DragReorder.MouseMove(sender, e);
+    private void Clock_DragOver(object sender, DragEventArgs e) => DragReorder.DragOver(sender, e);
+    private void Clock_DragLeave(object sender, DragEventArgs e) => DragReorder.DragLeave(sender, e);
+    private void Clock_Drop(object sender, DragEventArgs e)
+    {
+        if (DragReorder.Drop(sender, e)) App.Current.SaveData();
+    }
+
+    private static T? FindAncestor<T>(DependencyObject? d) where T : DependencyObject
+    {
+        for (; d != null; d = d is System.Windows.Media.Visual ? System.Windows.Media.VisualTreeHelper.GetParent(d) : LogicalTreeHelper.GetParent(d))
+            if (d is T t) return t;
+        return null;
+    }
+
     private void RemoveClock_Click(object sender, RoutedEventArgs e)
     {
         if (((FrameworkElement)sender).Tag is WorldClock c) App.Current.Data.WorldClocks.Remove(c);
