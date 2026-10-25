@@ -41,6 +41,10 @@
   <DockPanel x:Name="AlarmsPage" Grid.Column="1" Margin="28,22">
     <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
       <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}" Content="+  New alarm" Click="NewAlarm_Click"/>
+      <ComboBox x:Name="SortBox" DockPanel.Dock="Right" Width="190" Margin="0,0,12,0" SelectionChanged="SortBox_SelectionChanged" ToolTip="How to order the alarms">
+        <ComboBoxItem Content="Soonest first" Tag="Soonest"/>
+        <ComboBoxItem Content="By group" Tag="Groups"/>
+      </ComboBox>
       <StackPanel>
         <TextBlock Text="Alarms" FontSize="28" FontWeight="ExtraBold"/>
       </StackPanel>

@@ -12,8 +12,9 @@ public partial class MainWindow : Window
         AlarmList.ItemsSource = App.Current.Data.Alarms;
         WorldClockList.ItemsSource = App.Current.Data.WorldClocks;
         var view = System.Windows.Data.CollectionViewSource.GetDefaultView(AlarmList.ItemsSource);
-        view.GroupDescriptions.Add(new System.Windows.Data.PropertyGroupDescription(nameof(Alarm.Group)));
         ((System.Windows.Data.ListCollectionView)view).CustomSort = new AlarmSorter(App.Current.Data);
+        ApplySortMode();
+        SortBox.SelectedIndex = App.Current.Data.AlarmSort == "Groups" ? 1 : 0;
         App.Current.Scheduler.Ticked += UpdateNext;
         UpdateNext();
         RefreshStartupSwitch();
@@ -27,6 +28,7 @@ public partial class MainWindow : Window
     {
         var now = DateTime.Now;
         ClockText.Text = TimeFormat.Time(now);
+        ResortIfDue(now);
         foreach (var c in App.Current.Data.WorldClocks) c.Refresh(now);
         DateText.Text = now.ToString("dddd, d MMMM yyyy");
         var next = Scheduler.NextAlarm(App.Current.Data.Alarms, now);
@@ -222,6 +224,37 @@ public partial class MainWindow : Window
     }
 
     public void RefreshWidgetSwitch() => SettingsView?.Refresh();
+
+    private bool _sortReady;
+    private int _lastSortMinute = -1;
+
+    /// <summary>Groups the list only in "By group" mode; "Soonest first" is one flat list.</summary>
+    private void ApplySortMode()
+    {
+        var view = System.Windows.Data.CollectionViewSource.GetDefaultView(AlarmList.ItemsSource);
+        view.GroupDescriptions.Clear();
+        if (App.Current.Data.AlarmSort == "Groups")
+            view.GroupDescriptions.Add(new System.Windows.Data.PropertyGroupDescription(nameof(Alarm.Group)));
+        view.Refresh();
+    }
+
+    private void SortBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (!_sortReady) { _sortReady = true; return; } // ignore the initial selection
+        if (SortBox.SelectedItem is not System.Windows.Controls.ComboBoxItem item) return;
+        App.Current.Data.AlarmSort = (string)item.Tag;
+        App.Current.SaveData();
+        ApplySortMode();
+    }
+
+    /// <summary>Re-sorts once a minute (countdowns change order), but never while an alarm card is open.</summary>
+    private void ResortIfDue(DateTime now)
+    {
+        if (now.Minute == _lastSortMinute) return;
+        if (App.Current.Data.Alarms.Any(a => a.IsExpanded)) return;
+        _lastSortMinute = now.Minute;
+        System.Windows.Data.CollectionViewSource.GetDefaultView(AlarmList.ItemsSource).Refresh();
+    }
 
     public void RefreshList()
     {

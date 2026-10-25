@@ -206,6 +206,8 @@ public class AppData
     public List<string> GroupOrder { get; set; } = new();
     public bool Use24Hour { get; set; }
     public bool DarkMode { get; set; }
+    /// <summary>"Soonest" = one list, next alarm first; "Groups" = grouped by Morning, Work….</summary>
+    public string AlarmSort { get; set; } = "Soonest";
     public bool ShowWidget { get; set; }
     public double? WidgetLeft { get; set; }
     public double? WidgetTop { get; set; }
