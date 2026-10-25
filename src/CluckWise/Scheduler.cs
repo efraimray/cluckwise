@@ -17,6 +17,11 @@ public class Scheduler
     public event Action<CountdownTimer>? TimerDone;
     /// <summary>Raised once, N minutes before an alarm that has a reminder set.</summary>
     public event Action<Alarm, DateTime>? ReminderDue;
+    /// <summary>Raised once a year at 9 AM (or when CluckWise starts later that day) on someone's birthday.</summary>
+    public event Action<Birthday>? BirthdayDue;
+    /// <summary>Raised once a year at 9 AM the day before a birthday.</summary>
+    public event Action<Birthday>? BirthdayTomorrow;
+    private static readonly TimeSpan BirthdayTime = new(9, 0, 0);
     private DateTime _lastWakeUpdate = DateTime.MinValue;
 
     public Scheduler(AppData data)
@@ -70,6 +75,24 @@ public class Scheduler
             WakeTimer.Update(_data);
         }
 
+        if (now.TimeOfDay >= BirthdayTime)
+        {
+            foreach (var b in _data.Birthdays.ToList())
+            {
+                int days = (b.Next(now.Date) - now.Date).Days;
+                if (days == 0 && b.LastCelebratedYear != now.Year)
+                {
+                    b.LastCelebratedYear = now.Year;
+                    BirthdayDue?.Invoke(b);
+                }
+                else if (days == 1 && b.LastHeadsUpYear != now.Year)
+                {
+                    b.LastHeadsUpYear = now.Year;
+                    BirthdayTomorrow?.Invoke(b);
+                }
+            }
+        }
+
         Morning.ResetIfNewDay(_data);
         _lastCheck = now;
         foreach (var alarm in _data.Alarms) alarm.Countdown = CountdownText(alarm, now);
@@ -89,6 +112,27 @@ public class Scheduler
             case RepeatMode.Daily:
                 var today = after.Date + time;
                 return today > after ? today : today.AddDays(1);
+
+            case RepeatMode.Monthly:
+                // e.g. "the 31st" falls on the last day in shorter months
+                for (int i = 0; i <= 2; i++)
+                {
+                    var month = new DateTime(after.Year, after.Month, 1).AddMonths(i);
+                    int day = Math.Min(alarm.OnceDate.Day, DateTime.DaysInMonth(month.Year, month.Month));
+                    var candidate = new DateTime(month.Year, month.Month, day) + time;
+                    if (candidate > after) return candidate;
+                }
+                return null;
+
+            case RepeatMode.Yearly:
+                for (int i = 0; i <= 1; i++)
+                {
+                    int year = after.Year + i;
+                    int day = Math.Min(alarm.OnceDate.Day, DateTime.DaysInMonth(year, alarm.OnceDate.Month)); // 29 Feb -> 28 Feb
+                    var candidate = new DateTime(year, alarm.OnceDate.Month, day) + time;
+                    if (candidate > after) return candidate;
+                }
+                return null;
 
             default:
                 for (int i = 0; i <= 7; i++)

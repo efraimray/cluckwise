@@ -1,0 +1,51 @@
+<UserControl x:Class="CluckWise.BirthdaysPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+      <TextBlock Text="Birthdays" FontSize="28" FontWeight="ExtraBold"/>
+      <TextBlock Text="A heads-up the day before, and a little celebration at 9 AM on the day" FontSize="14" Foreground="{StaticResource Muted}"/>
+    </StackPanel>
+
+    <Border DockPanel.Dock="Top" Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="16" Padding="18,14" Margin="0,0,0,18">
+      <StackPanel>
+        <TextBlock Style="{StaticResource SectionLabel}" Text="ADD A BIRTHDAY"/>
+        <WrapPanel>
+          <TextBox x:Name="NameBox" Style="{StaticResource Field}" Width="240" Margin="0,0,10,8" ToolTip="Name"/>
+          <DatePicker x:Name="DateBox" Width="170" Margin="0,0,10,8" VerticalAlignment="Center"/>
+          <CheckBox x:Name="KnowYearBox" Content="I know the year (show their age)" VerticalAlignment="Center" Margin="0,0,14,8"/>
+          <Button Style="{StaticResource PrimaryButton}" Content="Add birthday" Margin="0,0,0,8" Click="Add_Click"/>
+        </WrapPanel>
+        <TextBlock x:Name="ErrorText" Foreground="#B42318" FontSize="13" Visibility="Collapsed"/>
+      </StackPanel>
+    </Border>
+
+    <TextBlock x:Name="EmptyText" DockPanel.Dock="Top" Text="No birthdays yet. Add family and friends so you never miss one." Foreground="{StaticResource Muted}"/>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+      <ItemsControl x:Name="BirthdayList">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border x:Name="card" Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="14" Padding="18,12" Margin="0,0,0,8">
+              <DockPanel>
+                <Button DockPanel.Dock="Right" Content="✕" Width="32" Height="32" Background="Transparent" BorderThickness="0"
+                        Foreground="{StaticResource Muted}" Cursor="Hand" ToolTip="Remove" Tag="{Binding}" Click="Remove_Click"/>
+                <TextBlock DockPanel.Dock="Right" Text="{Binding Countdown}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,14,0"/>
+                <StackPanel>
+                  <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="Bold"/>
+                  <TextBlock Text="{Binding DateText}" FontSize="13" Foreground="{StaticResource Muted}"/>
+                </StackPanel>
+              </DockPanel>
+            </Border>
+            <DataTemplate.Triggers>
+              <DataTrigger Binding="{Binding DaysUntil}" Value="0">
+                <Setter TargetName="card" Property="Background" Value="{StaticResource YolkSoft}"/>
+                <Setter TargetName="card" Property="BorderBrush" Value="{StaticResource Yolk}"/>
+              </DataTrigger>
+            </DataTemplate.Triggers>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

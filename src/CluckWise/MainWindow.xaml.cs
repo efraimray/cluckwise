@@ -10,6 +10,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         AlarmList.ItemsSource = App.Current.Data.Alarms;
+        WorldClockList.ItemsSource = App.Current.Data.WorldClocks;
         var view = System.Windows.Data.CollectionViewSource.GetDefaultView(AlarmList.ItemsSource);
         view.GroupDescriptions.Add(new System.Windows.Data.PropertyGroupDescription(nameof(Alarm.Group)));
         view.SortDescriptions.Add(new SortDescription(nameof(Alarm.Group), ListSortDirection.Ascending));
@@ -28,6 +29,7 @@ public partial class MainWindow : Window
     {
         var now = DateTime.Now;
         ClockText.Text = now.ToString("h:mm tt");
+        foreach (var c in App.Current.Data.WorldClocks) c.Refresh(now);
         DateText.Text = now.ToString("dddd, d MMMM yyyy");
         var next = Scheduler.NextAlarm(App.Current.Data.Alarms, now);
         if (next is { } n)
@@ -166,7 +168,8 @@ public partial class MainWindow : Window
 
     private void Nav_Checked(object sender, RoutedEventArgs e)
     {
-        if (AlarmsPage == null || TimersView == null || StopwatchView == null || SettingsView == null || MorningView == null) return; // still loading
+        if (AlarmsPage == null || TimersView == null || StopwatchView == null || SettingsView == null || MorningView == null || BirthdaysView == null) return; // still loading
+        BirthdaysView.Visibility = sender == NavBirthdays ? Visibility.Visible : Visibility.Collapsed;
         MorningView.Visibility = sender == NavMorning ? Visibility.Visible : Visibility.Collapsed;
         AlarmsPage.Visibility = sender == NavAlarms ? Visibility.Visible : Visibility.Collapsed;
         TimersView.Visibility = sender == NavTimers ? Visibility.Visible : Visibility.Collapsed;

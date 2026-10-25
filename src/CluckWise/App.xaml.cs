@@ -42,6 +42,12 @@ public partial class App : Application
         Morning.ResetIfNewDay(Data);
         Scheduler = new Scheduler(Data);
         Scheduler.AlarmDue += OnAlarmDue;
+        Scheduler.BirthdayDue += b => { SaveData(); new CelebrationWindow(b).Show(); };
+        Scheduler.BirthdayTomorrow += b =>
+        {
+            SaveData();
+            ShowTrayMessage($"Tomorrow is {b.Name}'s birthday", b.TurningAge(DateTime.Today) is { } a ? $"They're turning {a}. Time to plan something!" : "Time to plan something!");
+        };
         Scheduler.ReminderDue += (alarm, when) =>
         {
             SaveData();

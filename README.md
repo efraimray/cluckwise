@@ -8,13 +8,15 @@
 
 ## Features
 
-- **Alarms**: one-time, every day or chosen weekdays, organised into groups (Morning, Work, Exercise…). Edit them inline by clicking a card.
+- **Alarms**: one-time, every day, chosen weekdays, monthly (e.g. "pay rent on the 1st") or yearly, organised into groups (Morning, Work, Exercise…). Edit them inline by clicking a card.
 - **Snooze and gentle wake-up**: the volume rises over 30 seconds. Choose a snooze length per alarm.
 - **Original sounds**: Rooster Crow, Sunrise Chime, Gentle Beep, Classic Bell and Marimba, all synthesised in code. You can also use your own MP3/WAV files.
 - **"When it rings…" actions**: open a website, app, file or folder automatically. *Run silently* turns an alarm into a scheduled task.
 - **Morning to-do and streak**: dismiss a morning alarm to see your daily checklist. Mornings without snoozing build your streak.
 - **Timers**: several countdowns at once, with quick presets (1, 5, 10, 25 min focus, 1 hour).
 - **Stopwatch** with laps.
+- **World clocks**: other cities' times on the dashboard.
+- **Birthdays**: a heads-up the day before and a confetti celebration on the day, with the age they're turning.
 - **Wakes the PC from sleep** for alarms (when Windows allows wake timers).
 - **Reminders before alarms**: a quiet heads-up 5–60 minutes before an alarm rings.
 - **PC actions**: lock the PC, turn off the screen, sleep (with a cancellable countdown) or play a song or playlist when an alarm rings.
@@ -48,7 +50,7 @@ Alarms, timers and settings are saved to `%AppData%\CluckWise\data.json`. Settin
 | `MainWindow.xaml(.cs)` | Sidebar, next-alarm card, grouped alarm list |
 | `AlarmEditorPanel.xaml(.cs)` | Inline alarm editor |
 | `RingWindow.xaml(.cs)` | Ringing popup and "Good morning" checklist |
-| `TimersPage`, `StopwatchPage`, `MorningPage`, `SettingsPage` | The other sidebar pages |
+| `TimersPage`, `StopwatchPage`, `MorningPage`, `BirthdaysPage`, `SettingsPage` | The other sidebar pages |
 | `Scheduler.cs` | Checks alarms and timers every second |
 | `Sounds.cs` | Synthesised alarm sounds and playback |
 | `Morning.cs` | Morning checklist and streak rules |

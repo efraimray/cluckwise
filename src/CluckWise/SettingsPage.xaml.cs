@@ -23,6 +23,8 @@ public partial class SettingsPage : UserControl
         var v = typeof(App).Assembly.GetName().Version;
         VersionText.Text = $"CluckWise {v?.Major}.{v?.Minor}.{v?.Build}";
         TodoSwitch.IsChecked = data.ShowTodoAfterMorningAlarm;
+        foreach (var z in TimeZoneInfo.GetSystemTimeZones()) ZoneBox.Items.Add(new ZoneItem(z));
+        ClockList.ItemsSource = data.WorldClocks;
         _loading = false;
         IsVisibleChanged += (_, _) => { if (IsVisible) Refresh(); else StopPreview(); };
     }
@@ -76,6 +78,36 @@ public partial class SettingsPage : UserControl
         Sounds.Stop();
         _playing = false;
         PlayButton.Content = "Play";
+    }
+
+    private record ZoneItem(TimeZoneInfo Zone)
+    {
+        public override string ToString() => Zone.DisplayName;
+    }
+
+    private void AddClock_Click(object sender, RoutedEventArgs e)
+    {
+        var item = ZoneBox.SelectedItem as ZoneItem
+                   ?? ZoneBox.Items.OfType<ZoneItem>().FirstOrDefault(z => z.Zone.DisplayName.Contains(ZoneBox.Text.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (item == null || ZoneBox.Text.Trim().Length == 0)
+        {
+            MessageBox.Show(Window.GetWindow(this), "Pick a time zone from the list first.", "CluckWise");
+            return;
+        }
+        var label = ClockLabelBox.Text.Trim();
+        var clock = new WorldClock { TimeZoneId = item.Zone.Id, Label = label.Length > 0 ? label : WorldClock.DefaultLabel(item.Zone) };
+        clock.Refresh(DateTime.Now);
+        App.Current.Data.WorldClocks.Add(clock);
+        App.Current.SaveData();
+        ClockLabelBox.Clear();
+        ZoneBox.SelectedIndex = -1;
+        ZoneBox.Text = "";
+    }
+
+    private void RemoveClock_Click(object sender, RoutedEventArgs e)
+    {
+        if (((FrameworkElement)sender).Tag is WorldClock c) App.Current.Data.WorldClocks.Remove(c);
+        App.Current.SaveData();
     }
 
     private void Power_Click(object sender, RoutedEventArgs e) =>

@@ -21,7 +21,7 @@ public abstract class Observable : INotifyPropertyChanged
     }
 }
 
-public enum RepeatMode { Once, Daily, Weekly }
+public enum RepeatMode { Once, Daily, Weekly, Monthly, Yearly }
 
 public enum ActionKind { OpenWebsite, OpenProgram, PlayMusic, LockPC, ScreenOff, Sleep }
 
@@ -57,7 +57,7 @@ public class Alarm : Observable
     /// <summary>Index 0 = Sunday … 6 = Saturday (matches DayOfWeek).</summary>
     public bool[] Days { get; set; } = { false, true, true, true, true, true, false };
 
-    /// <summary>Date for one-time alarms.</summary>
+    /// <summary>Date for one-time alarms; for monthly/yearly alarms, the day (and month) they repeat on.</summary>
     public DateTime OnceDate { get; set; } = DateTime.Today;
 
     public string Sound { get; set; } = Sounds.RoosterCrow;
@@ -91,6 +91,8 @@ public class Alarm : Observable
     {
         RepeatMode.Once => "Once · " + OnceDate.ToString("ddd d MMM"),
         RepeatMode.Daily => "Every day",
+        RepeatMode.Monthly => $"Monthly on the {Ordinal(OnceDate.Day)}",
+        RepeatMode.Yearly => "Yearly on " + OnceDate.ToString("d MMMM"),
         _ => WeeklyText(),
     };
 
@@ -125,6 +127,8 @@ public class Alarm : Observable
         get => _countdown;
         set => Set(ref _countdown, value);
     }
+
+    private static string Ordinal(int n) => n + ((n % 100) is 11 or 12 or 13 ? "th" : (n % 10) switch { 1 => "st", 2 => "nd", 3 => "rd", _ => "th" });
 
     private string WeeklyText()
     {
@@ -185,6 +189,8 @@ public class AppData
     public int Version { get; set; } = 1;
     public ObservableCollection<Alarm> Alarms { get; set; } = new();
     public ObservableCollection<CountdownTimer> Timers { get; set; } = new();
+    public ObservableCollection<WorldClock> WorldClocks { get; set; } = new();
+    public ObservableCollection<Birthday> Birthdays { get; set; } = new();
     public bool StartWithWindows { get; set; }
     public bool ShowedTrayTip { get; set; }
     public bool AskedAboutStartup { get; set; }

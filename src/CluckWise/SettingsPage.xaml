@@ -34,6 +34,28 @@
         </StackPanel>
       </Border>
 
+      <TextBlock Style="{StaticResource SectionLabel}" Text="WORLD CLOCKS"/>
+      <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16" Margin="0,0,0,22">
+        <StackPanel>
+          <TextBlock Text="Show other cities' times on the Alarms page" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,10"/>
+          <ComboBox x:Name="ZoneBox" Margin="0,0,0,8" IsEditable="True" IsTextSearchEnabled="True" ToolTip="Start typing a city or time zone"/>
+          <DockPanel Margin="0,0,0,10">
+            <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}" Content="Add city" Margin="10,0,0,0" Click="AddClock_Click"/>
+            <TextBox x:Name="ClockLabelBox" Style="{StaticResource Field}" ToolTip="Name to show (optional), e.g. Mum in London"/>
+          </DockPanel>
+          <ItemsControl x:Name="ClockList">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <DockPanel Margin="0,4">
+                  <Button DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}" Content="Remove" Height="34" Tag="{Binding}" Click="RemoveClock_Click"/>
+                  <TextBlock VerticalAlignment="Center" FontSize="14"><Run Text="{Binding Label, Mode=OneWay}" FontWeight="SemiBold"/><Run Text="  "/><Run Text="{Binding TimeText, Mode=OneWay}" Foreground="{StaticResource Muted}"/></TextBlock>
+                </DockPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
       <TextBlock Style="{StaticResource SectionLabel}" Text="WAKE FROM SLEEP"/>
       <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16" Margin="0,0,0,22">
         <DockPanel>

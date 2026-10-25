@@ -34,6 +34,7 @@
           <RadioButton x:Name="NavTimers" Style="{StaticResource NavButton}" GroupName="nav" Content="Timers" Checked="Nav_Checked"/>
           <RadioButton x:Name="NavStopwatch" Style="{StaticResource NavButton}" GroupName="nav" Content="Stopwatch" Checked="Nav_Checked"/>
           <RadioButton x:Name="NavMorning" Style="{StaticResource NavButton}" GroupName="nav" Content="Morning to-do" Checked="Nav_Checked"/>
+          <RadioButton x:Name="NavBirthdays" Style="{StaticResource NavButton}" GroupName="nav" Content="Birthdays" Checked="Nav_Checked"/>
         </StackPanel>
       </DockPanel>
     </Border>
@@ -57,6 +58,22 @@
         </StackPanel>
       </DockPanel>
     </Border>
+    <ItemsControl x:Name="WorldClockList" DockPanel.Dock="Top" Margin="0,0,0,14">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="14" Padding="16,10" Margin="0,0,10,8" MinWidth="150">
+            <StackPanel>
+              <TextBlock Text="{Binding Label}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource Muted}"/>
+              <TextBlock Text="{Binding TimeText}" FontSize="22" FontWeight="ExtraBold"/>
+              <TextBlock Text="{Binding DayText}" FontSize="12" Foreground="{StaticResource Muted}"/>
+            </StackPanel>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
     <ListBox x:Name="AlarmList" BorderThickness="0" Background="Transparent"
              HorizontalContentAlignment="Stretch"
              ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False">
@@ -178,6 +195,7 @@
   <local:StopwatchPage x:Name="StopwatchView" Grid.Column="1" Margin="28,22" Visibility="Collapsed"/>
   <local:SettingsPage x:Name="SettingsView" Grid.Column="1" Margin="28,22" Visibility="Collapsed"/>
   <local:MorningPage x:Name="MorningView" Grid.Column="1" Margin="28,22" Visibility="Collapsed"/>
+  <local:BirthdaysPage x:Name="BirthdaysView" Grid.Column="1" Margin="28,22" Visibility="Collapsed"/>
   <Border x:Name="UndoBar" Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,28"
           Background="{StaticResource Ink}" CornerRadius="14" Padding="20,10,10,10" Visibility="Collapsed" Opacity="0">
     <Border.RenderTransform><TranslateTransform x:Name="UndoSlide" Y="20"/></Border.RenderTransform>

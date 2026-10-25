@@ -55,8 +55,10 @@ public partial class AlarmEditorPanel : UserControl
         OnceRadio.IsChecked = _edit.Repeat == RepeatMode.Once;
         DailyRadio.IsChecked = _edit.Repeat == RepeatMode.Daily;
         WeeklyRadio.IsChecked = _edit.Repeat == RepeatMode.Weekly;
+        MonthlyRadio.IsChecked = _edit.Repeat == RepeatMode.Monthly;
+        YearlyRadio.IsChecked = _edit.Repeat == RepeatMode.Yearly;
         for (int i = 0; i < 7; i++) _days[i].IsChecked = _edit.Days[i];
-        OnceDatePicker.SelectedDate = _edit.OnceDate < DateTime.Today ? DateTime.Today : _edit.OnceDate;
+        OnceDatePicker.SelectedDate = _edit.Repeat == RepeatMode.Once && _edit.OnceDate < DateTime.Today ? DateTime.Today : _edit.OnceDate;
         LabelBox.Text = _edit.Label;
         GroupBox.Text = isNew ? "Morning" : _edit.Group;
         SoundBox.SelectedItem = _edit.Sound;
@@ -131,12 +133,20 @@ public partial class AlarmEditorPanel : UserControl
         _edit.Hour = hour12 % 12 + (AmPmBox.SelectedIndex == 1 ? 12 : 0);
         _edit.Minute = Math.Max(0, MinuteBox.SelectedIndex);
         _edit.Repeat = OnceRadio.IsChecked == true ? RepeatMode.Once
-                     : DailyRadio.IsChecked == true ? RepeatMode.Daily : RepeatMode.Weekly;
+                     : DailyRadio.IsChecked == true ? RepeatMode.Daily
+                     : MonthlyRadio.IsChecked == true ? RepeatMode.Monthly
+                     : YearlyRadio.IsChecked == true ? RepeatMode.Yearly : RepeatMode.Weekly;
         _edit.Days = _days.Select(d => d.IsChecked == true).ToArray();
         _edit.OnceDate = OnceDatePicker.SelectedDate ?? DateTime.Today;
 
         DaysPanel.Visibility = _edit.Repeat == RepeatMode.Weekly ? Visibility.Visible : Visibility.Collapsed;
-        OnceDatePicker.Visibility = _edit.Repeat == RepeatMode.Once ? Visibility.Visible : Visibility.Collapsed;
+        DateRow.Visibility = _edit.Repeat is RepeatMode.Once or RepeatMode.Monthly or RepeatMode.Yearly ? Visibility.Visible : Visibility.Collapsed;
+        DateHint.Text = _edit.Repeat switch
+        {
+            RepeatMode.Monthly => _edit.RepeatText + (_edit.OnceDate.Day > 28 ? " (last day in shorter months)" : ""),
+            RepeatMode.Yearly => _edit.RepeatText,
+            _ => "",
+        };
 
         var next = Scheduler.NextOccurrence(_edit, DateTime.Now);
         SummaryText.Text = next is { } n

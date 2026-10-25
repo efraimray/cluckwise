@@ -55,13 +55,18 @@
         </Border>
 
         <TextBlock Style="{StaticResource SectionLabel}" Text="REPEAT"/>
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-          <RadioButton x:Name="OnceRadio" Content="Once" GroupName="repeat" Margin="0,0,18,0" Checked="Changed"/>
-          <RadioButton x:Name="DailyRadio" Content="Every day" GroupName="repeat" Margin="0,0,18,0" Checked="Changed"/>
-          <RadioButton x:Name="WeeklyRadio" Content="Chosen days" GroupName="repeat" Checked="Changed"/>
-        </StackPanel>
+        <WrapPanel Margin="0,0,0,6">
+          <RadioButton x:Name="OnceRadio" Content="Once" GroupName="repeat" Margin="0,0,18,6" Checked="Changed"/>
+          <RadioButton x:Name="DailyRadio" Content="Every day" GroupName="repeat" Margin="0,0,18,6" Checked="Changed"/>
+          <RadioButton x:Name="WeeklyRadio" Content="Chosen days" GroupName="repeat" Margin="0,0,18,6" Checked="Changed"/>
+          <RadioButton x:Name="MonthlyRadio" Content="Monthly" GroupName="repeat" Margin="0,0,18,6" Checked="Changed"/>
+          <RadioButton x:Name="YearlyRadio" Content="Yearly" GroupName="repeat" Margin="0,0,0,6" Checked="Changed"/>
+        </WrapPanel>
         <StackPanel x:Name="DaysPanel" Orientation="Horizontal" Margin="0,0,0,10"/>
-        <DatePicker x:Name="OnceDatePicker" Width="200" HorizontalAlignment="Left" Margin="0,0,0,10" SelectedDateChanged="Changed"/>
+        <StackPanel x:Name="DateRow" Orientation="Horizontal" Margin="0,0,0,10">
+          <DatePicker x:Name="OnceDatePicker" Width="200" SelectedDateChanged="Changed"/>
+          <TextBlock x:Name="DateHint" Foreground="{StaticResource Muted}" FontSize="13" VerticalAlignment="Center" Margin="12,0,0,0"/>
+        </StackPanel>
 
         <TextBlock Style="{StaticResource SectionLabel}" Text="LABEL" Margin="0,10,0,8"/>
         <TextBox x:Name="LabelBox" Style="{StaticResource Field}" TextChanged="Changed" Margin="0,0,0,12"/>
