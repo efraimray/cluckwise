@@ -1,12 +1,9 @@
 <p align="center">
-  <img src="docs/logo.png" alt="CluckWise logo: a chicken whose body is a clock" width="128">
+  <img src="docs/banner.png" alt="CluckWise: Rise wise. The Windows alarm clock that makes your mornings productive." width="100%">
 </p>
 
-<h1 align="center">CluckWise</h1>
-<p align="center"><b>Rise wise.</b> The Windows alarm clock that makes your mornings productive.</p>
-
 <p align="center">
-  <img src="docs/screenshot-alarms.png" alt="CluckWise main window showing grouped alarms and the next-alarm card" width="900">
+  <img src="docs/screenshot-alarms.png" alt="CluckWise main window: the next-alarm card, alarms grouped into Morning and Work, and the morning streak in the sidebar" width="100%">
 </p>
 
 ## Features
