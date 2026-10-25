@@ -24,29 +24,29 @@ public partial class FloatingWidget : Window
 
         if (Scheduler.NextAlarm(data.Alarms.Where(a => !a.IsNew), now) is { } n)
         {
-            NextText.Text = $"{TimeFormat.Time(n.when)} · {n.alarm.Label}";
+            NextRun.Text = $"{TimeFormat.Time(n.when)} · {n.alarm.Label}";
             NextWhen.Text = "in " + Scheduler.Humanize(n.when - now);
         }
         else
         {
-            NextText.Text = "No alarms on";
+            NextRun.Text = "no alarms on";
             NextWhen.Text = "Double-click to add one";
         }
 
-        FocusPanel.Visibility = DeepWork.Phase == FocusPhase.Idle ? Visibility.Collapsed : Visibility.Visible;
+        FocusLine.Visibility = DeepWork.Phase == FocusPhase.Idle ? Visibility.Collapsed : Visibility.Visible;
         if (DeepWork.Phase != FocusPhase.Idle)
         {
             var left = DeepWork.Remaining;
-            FocusLabel.Text = DeepWork.Paused ? "PAUSED" : DeepWork.Phase == FocusPhase.Focus ? "FOCUS" : "BREAK";
-            FocusText.Text = $"{(int)left.TotalMinutes:00}:{left.Seconds:00}" + (DeepWork.Phase == FocusPhase.Focus ? " · " + DeepWork.Task : "");
+            FocusLabel.Text = DeepWork.Paused ? "Paused " : DeepWork.Phase == FocusPhase.Focus ? "Focus " : "Break ";
+            FocusRun.Text = $"{(int)left.TotalMinutes:00}:{left.Seconds:00}" + (DeepWork.Phase == FocusPhase.Focus ? " · " + DeepWork.Task : "");
         }
 
         var timer = data.Timers.Where(t => t.Running).OrderBy(t => t.RemainingSeconds).FirstOrDefault();
-        TimerPanel.Visibility = timer == null ? Visibility.Collapsed : Visibility.Visible;
+        TimerLine.Visibility = timer == null ? Visibility.Collapsed : Visibility.Visible;
         if (timer != null)
         {
             int others = data.Timers.Count(t => t.Running) - 1;
-            TimerText.Text = $"{timer.Label} · {timer.RemainingText}" + (others > 0 ? $"  (+{others} more)" : "");
+            TimerRun.Text = $"{timer.Label} · {timer.RemainingText}" + (others > 0 ? $"  (+{others})" : "");
         }
     }
 
@@ -99,8 +99,9 @@ public partial class FloatingWidget : Window
         SavePosition();
     }
 
-    private void Card_MouseEnter(object sender, MouseEventArgs e) => CloseButton.Opacity = 1;
-    private void Card_MouseLeave(object sender, MouseEventArgs e) => CloseButton.Opacity = 0;
+    // The card brightens slightly on hover so it's clear it can be dragged.
+    private void Card_MouseEnter(object sender, MouseEventArgs e) => Card.Opacity = 1;
+    private void Card_MouseLeave(object sender, MouseEventArgs e) => Card.Opacity = 0.92;
 
     private void Open_Click(object sender, RoutedEventArgs e) => App.Current.ShowMain();
 

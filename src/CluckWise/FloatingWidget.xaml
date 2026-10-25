@@ -4,11 +4,37 @@
         Title="CluckWise widget" WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ResizeMode="NoResize" SizeToContent="WidthAndHeight"
         UseLayoutRounding="True" FontFamily="{StaticResource UiFont}" ShowActivated="False">
-  <Border x:Name="Card" Background="{DynamicResource Ink}" CornerRadius="18" Padding="16,12,14,12" Margin="10"
-          MinWidth="230" Cursor="SizeAll" MouseLeftButtonDown="Card_MouseLeftButtonDown"
+  <Window.Resources>
+    <!-- Small round icon button: no Windows chrome, brightens on hover -->
+    <Style x:Key="WidgetIconButton" TargetType="Button">
+      <Setter Property="Width" Value="20"/>
+      <Setter Property="Height" Value="20"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Focusable" Value="False"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" CornerRadius="10" Background="Transparent">
+              <Path x:Name="x" Data="M0,0 L7,7 M7,0 L0,7" Stroke="{DynamicResource SideText}" StrokeThickness="1.6"
+                    StrokeStartLineCap="Round" StrokeEndLineCap="Round" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.7"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="b" Property="Background" Value="#3A332B"/>
+                <Setter TargetName="x" Property="Opacity" Value="1"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
+
+  <Border x:Name="Card" Background="{DynamicResource Ink}" CornerRadius="14" Padding="12,8,8,9" Margin="8"
+          MaxWidth="250" Cursor="SizeAll" MouseLeftButtonDown="Card_MouseLeftButtonDown"
           MouseEnter="Card_MouseEnter" MouseLeave="Card_MouseLeave" ToolTip="Drag to move · double-click to open CluckWise">
     <Border.Effect>
-      <DropShadowEffect BlurRadius="16" ShadowDepth="3" Opacity="0.35"/>
+      <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.35"/>
     </Border.Effect>
     <Border.ContextMenu>
       <ContextMenu>
@@ -18,27 +44,23 @@
         <MenuItem Header="Hide widget" Click="Hide_Click"/>
       </ContextMenu>
     </Border.ContextMenu>
-    <Grid>
-      <StackPanel>
-        <StackPanel Orientation="Horizontal">
-          <Image Source="pack://application:,,,/Assets/logo.png" Width="26" Height="26" VerticalAlignment="Center"/>
-          <TextBlock x:Name="ClockText" FontSize="26" FontWeight="ExtraBold" Foreground="White" Margin="8,0,0,0" VerticalAlignment="Center"/>
-        </StackPanel>
-        <TextBlock Text="NEXT ALARM" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource Yolk}" Margin="0,8,0,1"/>
-        <TextBlock x:Name="NextText" FontSize="14" FontWeight="SemiBold" Foreground="White" TextTrimming="CharacterEllipsis" MaxWidth="260"/>
-        <TextBlock x:Name="NextWhen" FontSize="12" Foreground="{DynamicResource SideText}"/>
-        <StackPanel x:Name="FocusPanel" Visibility="Collapsed" Margin="0,8,0,0">
-          <TextBlock x:Name="FocusLabel" Text="FOCUS" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource Yolk}" Margin="0,0,0,1"/>
-          <TextBlock x:Name="FocusText" FontSize="14" FontWeight="SemiBold" Foreground="White" TextTrimming="CharacterEllipsis" MaxWidth="260"/>
-        </StackPanel>
-        <StackPanel x:Name="TimerPanel" Visibility="Collapsed" Margin="0,8,0,0">
-          <TextBlock Text="TIMER" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource Yolk}" Margin="0,0,0,1"/>
-          <TextBlock x:Name="TimerText" FontSize="14" FontWeight="SemiBold" Foreground="White" TextTrimming="CharacterEllipsis" MaxWidth="260"/>
-        </StackPanel>
-      </StackPanel>
-      <Button x:Name="CloseButton" Content="✕" Width="22" Height="22" HorizontalAlignment="Right" VerticalAlignment="Top"
-              Margin="0,-4,-6,0" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource SideText}"
-              Cursor="Hand" ToolTip="Hide widget" Opacity="0" Click="Hide_Click"/>
-    </Grid>
+    <StackPanel>
+      <DockPanel>
+        <Button x:Name="CloseButton" DockPanel.Dock="Right" Style="{StaticResource WidgetIconButton}" VerticalAlignment="Top"
+                Margin="8,0,0,0" ToolTip="Hide widget (turn it back on in Settings or the tray menu)" Click="Hide_Click"/>
+        <Image Source="pack://application:,,,/Assets/logo.png" Width="18" Height="18" VerticalAlignment="Center"/>
+        <TextBlock x:Name="ClockText" FontSize="18" FontWeight="ExtraBold" Foreground="White" Margin="6,0,0,0" VerticalAlignment="Center"/>
+      </DockPanel>
+      <TextBlock Margin="0,5,0,0" FontSize="12" TextTrimming="CharacterEllipsis">
+        <Run Text="Next " Foreground="{DynamicResource Yolk}" FontWeight="Bold"/><Run x:Name="NextRun" Foreground="White" FontWeight="SemiBold"/>
+      </TextBlock>
+      <TextBlock x:Name="NextWhen" FontSize="11" Foreground="{DynamicResource SideText}" TextTrimming="CharacterEllipsis"/>
+      <TextBlock x:Name="FocusLine" Margin="0,4,0,0" FontSize="12" TextTrimming="CharacterEllipsis" Visibility="Collapsed">
+        <Run x:Name="FocusLabel" Text="Focus " Foreground="{DynamicResource Yolk}" FontWeight="Bold"/><Run x:Name="FocusRun" Foreground="White" FontWeight="SemiBold"/>
+      </TextBlock>
+      <TextBlock x:Name="TimerLine" Margin="0,4,0,0" FontSize="12" TextTrimming="CharacterEllipsis" Visibility="Collapsed">
+        <Run Text="Timer " Foreground="{DynamicResource Yolk}" FontWeight="Bold"/><Run x:Name="TimerRun" Foreground="White" FontWeight="SemiBold"/>
+      </TextBlock>
+    </StackPanel>
   </Border>
 </Window>
