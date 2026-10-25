@@ -11,6 +11,8 @@ public partial class SettingsPage : UserControl
     private bool _loading = true;
     private bool _playing;
 
+    private List<ZoneChoice> _zones = new();
+
     public SettingsPage()
     {
         InitializeComponent();
@@ -23,7 +25,8 @@ public partial class SettingsPage : UserControl
         var v = typeof(App).Assembly.GetName().Version;
         VersionText.Text = $"CluckWise {v?.Major}.{v?.Minor}.{v?.Build}";
         TodoSwitch.IsChecked = data.ShowTodoAfterMorningAlarm;
-        foreach (var z in TimeZoneInfo.GetSystemTimeZones()) ZoneBox.Items.Add(new ZoneItem(z));
+        _zones = CityZones.All();
+        FilterZones();
         ClockList.ItemsSource = data.WorldClocks;
         _loading = false;
         IsVisibleChanged += (_, _) => { if (IsVisible) Refresh(); else StopPreview(); };
@@ -80,28 +83,37 @@ public partial class SettingsPage : UserControl
         PlayButton.Content = "Play";
     }
 
-    private record ZoneItem(TimeZoneInfo Zone)
+    private void FilterZones()
     {
-        public override string ToString() => Zone.DisplayName;
+        var q = ZoneSearch.Text.Trim();
+        ZoneHint.Visibility = q.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+        ZoneList.ItemsSource = _zones.Where(z => CityZones.Matches(z, q)).Take(80).ToList();
+    }
+
+    private void ZoneSearch_TextChanged(object sender, TextChangedEventArgs e) => FilterZones();
+
+    private void ZoneList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ZoneList.SelectedItem is ZoneChoice c && ClockLabelBox.Text.Trim().Length == 0)
+            ClockLabelBox.Text = c.Label;
     }
 
     private void AddClock_Click(object sender, RoutedEventArgs e)
     {
-        var item = ZoneBox.SelectedItem as ZoneItem
-                   ?? ZoneBox.Items.OfType<ZoneItem>().FirstOrDefault(z => z.Zone.DisplayName.Contains(ZoneBox.Text.Trim(), StringComparison.OrdinalIgnoreCase));
-        if (item == null || ZoneBox.Text.Trim().Length == 0)
+        var choice = ZoneList.SelectedItem as ZoneChoice ?? (ZoneList.Items.Count == 1 ? ZoneList.Items[0] as ZoneChoice : null);
+        if (choice == null)
         {
-            MessageBox.Show(Window.GetWindow(this), "Pick a time zone from the list first.", "CluckWise");
+            MessageBox.Show(Window.GetWindow(this), "Search for a city, then click it in the list.", "CluckWise");
             return;
         }
         var label = ClockLabelBox.Text.Trim();
-        var clock = new WorldClock { TimeZoneId = item.Zone.Id, Label = label.Length > 0 ? label : WorldClock.DefaultLabel(item.Zone) };
+        var clock = new WorldClock { TimeZoneId = choice.ZoneId, Label = label.Length > 0 ? label : choice.Label };
         clock.Refresh(DateTime.Now);
         App.Current.Data.WorldClocks.Add(clock);
         App.Current.SaveData();
         ClockLabelBox.Clear();
-        ZoneBox.SelectedIndex = -1;
-        ZoneBox.Text = "";
+        ZoneSearch.Clear();
+        ZoneList.SelectedIndex = -1;
     }
 
     private void RemoveClock_Click(object sender, RoutedEventArgs e)

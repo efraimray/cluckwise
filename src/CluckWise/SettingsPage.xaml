@@ -38,7 +38,14 @@
       <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="16" Padding="20,16" Margin="0,0,0,22">
         <StackPanel>
           <TextBlock Text="Show other cities' times on the Alarms page" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,10"/>
-          <ComboBox x:Name="ZoneBox" Margin="0,0,0,8" IsEditable="True" IsTextSearchEnabled="True" ToolTip="Start typing a city or time zone"/>
+          <Grid Margin="0,0,0,8">
+            <TextBox x:Name="ZoneSearch" Style="{StaticResource Field}" TextChanged="ZoneSearch_TextChanged"/>
+            <TextBlock x:Name="ZoneHint" Text="Search a city or time zone, e.g. Manila, London, Tokyo" Foreground="{StaticResource Muted}"
+                       Margin="14,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+          </Grid>
+          <Border BorderBrush="#E4DDD2" BorderThickness="1" CornerRadius="12" Padding="4" Margin="0,0,0,10">
+            <ListBox x:Name="ZoneList" MaxHeight="190" BorderThickness="0" Background="Transparent" SelectionChanged="ZoneList_SelectionChanged"/>
+          </Border>
           <DockPanel Margin="0,0,0,10">
             <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}" Content="Add city" Margin="10,0,0,0" Click="AddClock_Click"/>
             <TextBox x:Name="ClockLabelBox" Style="{StaticResource Field}" ToolTip="Name to show (optional), e.g. Mum in London"/>
