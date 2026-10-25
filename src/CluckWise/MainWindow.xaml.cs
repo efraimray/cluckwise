@@ -21,6 +21,7 @@ public partial class MainWindow : Window
         Morning.Changed += () => Dispatcher.Invoke(UpdateStreak);
         App.Current.Data.Tasks.CollectionChanged += (_, _) => UpdateStreak();
         UpdateStreak();
+        SizeChanged += (_, e) => Tag = e.NewSize.Width < 1150 ? "compact" : null;
     }
 
     private void UpdateNext()

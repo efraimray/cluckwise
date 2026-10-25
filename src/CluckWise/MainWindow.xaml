@@ -1,7 +1,7 @@
 <Window UseLayoutRounding="True" SnapsToDevicePixels="True" Foreground="{StaticResource Ink}" FontFamily="{StaticResource UiFont}" x:Class="CluckWise.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="CluckWise" Icon="pack://application:,,,/Assets/logo.png" Width="1100" Height="700" MinWidth="700" MinHeight="480"
+        Title="CluckWise" Icon="pack://application:,,,/Assets/logo.png" Width="1100" Height="700" MinWidth="760" MinHeight="520"
         WindowStartupLocation="CenterScreen" Background="{StaticResource Ground}"
         xmlns:local="clr-namespace:CluckWise">
   <Window.Resources>
@@ -111,10 +111,10 @@
           <StackPanel>
           <Grid Background="Transparent" Cursor="Hand" MouseLeftButtonUp="CardHeader_Click" ToolTip="Click to edit">
             <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="140"/>
+              <ColumnDefinition Width="130"/>
               <ColumnDefinition Width="*"/>
-              <ColumnDefinition Width="170"/>
-              <ColumnDefinition Width="150"/>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="Auto"/>
               <ColumnDefinition Width="60"/>
             </Grid.ColumnDefinitions>
             <TextBlock VerticalAlignment="Center" FontSize="30" FontWeight="ExtraBold">
@@ -133,8 +133,8 @@
               </StackPanel>
               <TextBlock x:Name="repeatText" Text="{Binding RepeatText, Mode=OneWay}" FontSize="13" Foreground="{StaticResource Muted}"/>
             </StackPanel>
-            <TextBlock Grid.Column="2" Text="{Binding Countdown, Mode=OneWay}" FontSize="13" Foreground="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-            <TextBlock Grid.Column="3" Text="{Binding Sound, Converter={StaticResource SoundName}}" FontSize="13" Foreground="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+            <TextBlock x:Name="countdownText" Grid.Column="2" Width="160" Text="{Binding Countdown, Mode=OneWay}" FontSize="13" Foreground="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+            <TextBlock x:Name="soundText" Grid.Column="3" Width="140" Text="{Binding Sound, Converter={StaticResource SoundName}}" FontSize="13" Foreground="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
             <CheckBox Grid.Column="4" Style="{StaticResource Switch}" IsChecked="{Binding Enabled}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="Switch_Click"/>
           </Grid>
           <ContentControl x:Name="editorHost" Content="{Binding}"/>
@@ -153,6 +153,10 @@
                   <DataTemplate/>
                 </Setter.Value>
               </Setter>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource AncestorType=Window}}" Value="compact">
+              <Setter TargetName="soundText" Property="Visibility" Value="Collapsed"/>
+              <Setter TargetName="countdownText" Property="Width" Value="120"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding Repeat}" Value="Weekly">
               <Setter TargetName="chips" Property="Visibility" Value="Visible"/>

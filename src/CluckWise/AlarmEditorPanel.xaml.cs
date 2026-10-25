@@ -77,6 +77,18 @@ public partial class AlarmEditorPanel : UserControl
         Unloaded += (_, _) => { if (_previewing) Sounds.Stop(); };
     }
 
+    // Two columns when there's room; one column (sound and actions below) when the window is narrow.
+    private void Panel_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        bool narrow = e.NewSize.Width < 780;
+        var cols = EditorGrid.ColumnDefinitions;
+        cols[1].Width = narrow ? new GridLength(0) : new GridLength(24);
+        cols[2].Width = narrow ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
+        Grid.SetColumn(RightColumn, narrow ? 0 : 2);
+        Grid.SetRow(RightColumn, narrow ? 1 : 0);
+        RightColumn.Margin = narrow ? new Thickness(0, 24, 0, 0) : new Thickness(0);
+    }
+
     private void Changed(object sender, RoutedEventArgs e) => UpdateState();
 
     /// <summary>Copies the form into the working copy and refreshes the summary line.</summary>
