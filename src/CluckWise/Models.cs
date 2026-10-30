@@ -21,7 +21,9 @@ public abstract class Observable : INotifyPropertyChanged
     }
 }
 
-public enum RepeatMode { Once, Daily, Weekly, Monthly, Yearly }
+public enum RepeatMode { Once, Daily, Weekly, Monthly, Yearly, EveryNDays, MonthlyWeekday, Dates }
+
+public enum ChallengeKind { None, Maths, TypePhrase, TapTiles }
 
 public enum ActionKind { OpenWebsite, OpenProgram, PlayMusic, LockPC, ScreenOff, Sleep }
 
@@ -71,6 +73,32 @@ public class Alarm : Observable
     public string ExtraTimesText => ExtraTimes.Count == 0 ? "" :
         "Also at " + string.Join(", ", ExtraTimes.OrderBy(m => m).Select(m => TimeFormat.Time(DateTime.Today.AddMinutes(m))));
 
+    // ---- Repeat details ----
+    /// <summary>Weekly: ring every N weeks (1 = every week), counted from <see cref="OnceDate"/>.</summary>
+    public int IntervalWeeks { get; set; } = 1;
+    /// <summary>EveryNDays: ring every N days starting on <see cref="OnceDate"/>.</summary>
+    public int IntervalDays { get; set; } = 2;
+    /// <summary>MonthlyWeekday: 1–4 = first…fourth, 5 = last.</summary>
+    public int NthWeek { get; set; } = 1;
+    /// <summary>MonthlyWeekday: 0 = Sunday … 6 = Saturday.</summary>
+    public int NthDay { get; set; } = 1;
+    /// <summary>Dates: the specific days to ring on.</summary>
+    public List<DateTime> SpecificDates { get; set; } = new();
+    /// <summary>Repeating alarms stop after this day (inclusive). Null = no end.</summary>
+    public DateTime? EndDate { get; set; }
+
+    /// <summary>"Skip next time": this one ring time is skipped, then the alarm carries on as normal.</summary>
+    public DateTime? SkipOccurrence { get; set; }
+
+    // ---- Waking up ----
+    public ChallengeKind Challenge { get; set; } = ChallengeKind.None;
+    /// <summary>1 = easy, 2 = normal, 3 = hard.</summary>
+    public int ChallengeLevel { get; set; } = 2;
+    /// <summary>Say the time and label out loud when ringing.</summary>
+    public bool SpeakOnRing { get; set; }
+    /// <summary>Quick naps remove themselves once dismissed.</summary>
+    public bool DeleteAfterRing { get; set; }
+
     public string Sound { get; set; } = Sounds.RoosterCrow;
     public int Volume { get; set; } = 80;
     public bool GentleWake { get; set; } = true;
@@ -100,10 +128,19 @@ public class Alarm : Observable
     [JsonIgnore]
     public string RepeatText => Repeat switch
     {
+        RepeatMode.Once when DeleteAfterRing => "Quick nap · removes itself after",
         RepeatMode.Once => "Once · " + OnceDate.ToString("ddd d MMM"),
-        RepeatMode.Daily => "Every day",
-        RepeatMode.Monthly => $"Monthly on the {Ordinal(OnceDate.Day)}",
-        RepeatMode.Yearly => "Yearly on " + OnceDate.ToString("d MMMM"),
+        RepeatMode.Daily => "Every day" + EndText,
+        RepeatMode.Monthly => (OnceDate.Day >= 31 ? "Monthly on the last day" : $"Monthly on the {Ordinal(OnceDate.Day)}") + EndText,
+        RepeatMode.Yearly => "Yearly on " + OnceDate.ToString("d MMMM") + EndText,
+        RepeatMode.EveryNDays => (IntervalDays == 1 ? "Every day" : $"Every {IntervalDays} days") + EndText,
+        RepeatMode.MonthlyWeekday => $"{NthName(NthWeek)} {((DayOfWeek)NthDay)} of the month" + EndText,
+        RepeatMode.Dates => SpecificDates.Count switch
+        {
+            0 => "No dates chosen",
+            1 => "On " + SpecificDates[0].ToString("ddd d MMM"),
+            _ => $"On {SpecificDates.Count} dates · next " + (SpecificDates.Where(d => d.Date >= DateTime.Today).OrderBy(d => d).Select(d => d.ToString("d MMM")).FirstOrDefault() ?? "none"),
+        },
         _ => WeeklyText(),
     };
 
@@ -139,17 +176,29 @@ public class Alarm : Observable
         set => Set(ref _countdown, value);
     }
 
+    private string EndText => EndDate is { } e ? " · until " + e.ToString("d MMM") : "";
+
+    public static string NthName(int n) => n switch { 1 => "First", 2 => "Second", 3 => "Third", 4 => "Fourth", _ => "Last" };
+
     private static string Ordinal(int n) => n + ((n % 100) is 11 or 12 or 13 ? "th" : (n % 10) switch { 1 => "st", 2 => "nd", 3 => "rd", _ => "th" });
 
     private string WeeklyText()
     {
         string[] names = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
-        if (Days.All(d => d)) return "Every day";
-        if (Days.SequenceEqual(new[] { false, true, true, true, true, true, false })) return "Weekdays";
-        if (Days.SequenceEqual(new[] { true, false, false, false, false, false, true })) return "Weekends";
+        string prefix = IntervalWeeks > 1 ? $"Every {IntervalWeeks} weeks: " : "";
+        if (Days.All(d => d)) return prefix + "Every day" + EndText;
+        if (Days.SequenceEqual(new[] { false, true, true, true, true, true, false })) return prefix + "Weekdays" + EndText;
+        if (Days.SequenceEqual(new[] { true, false, false, false, false, false, true })) return prefix + "Weekends" + EndText;
         var picked = names.Where((_, i) => Days[i]).ToArray();
-        return picked.Length == 0 ? "No days chosen" : string.Join(", ", picked);
+        var days = picked.Length == 0 ? "No days chosen" : string.Join(", ", picked);
+        return (IntervalWeeks > 1 ? $"Every {IntervalWeeks} weeks: " : "") + days + EndText;
     }
+
+    /// <summary>Simple weekly alarms show S M T… chips on their card; everything else shows text.</summary>
+    [JsonIgnore] public bool ShowDayChips => Repeat == RepeatMode.Weekly && IntervalWeeks <= 1 && EndDate == null;
+
+    [JsonIgnore]
+    public string SkipText => SkipOccurrence is { } s ? "Skipping " + s.ToString("ddd") + " " + TimeFormat.Time(s) : "";
 
     /// <summary>Call after editing so the list refreshes its text.</summary>
     public void Refresh()
@@ -162,6 +211,8 @@ public class Alarm : Observable
         Raise(nameof(SummaryText));
         Raise(nameof(Label));
         Raise(nameof(ExtraTimesText));
+        Raise(nameof(ShowDayChips));
+        Raise(nameof(SkipText));
         Raise(nameof(Group));
         Raise(nameof(Sound));
     }
@@ -183,6 +234,16 @@ public class Alarm : Observable
         Repeat = o.Repeat;
         Days = (bool[])o.Days.Clone();
         ExtraTimes = o.ExtraTimes.ToList();
+        IntervalWeeks = o.IntervalWeeks;
+        IntervalDays = o.IntervalDays;
+        NthWeek = o.NthWeek;
+        NthDay = o.NthDay;
+        SpecificDates = o.SpecificDates.ToList();
+        EndDate = o.EndDate;
+        Challenge = o.Challenge;
+        ChallengeLevel = o.ChallengeLevel;
+        SpeakOnRing = o.SpeakOnRing;
+        DeleteAfterRing = o.DeleteAfterRing;
         OnceDate = o.OnceDate;
         Sound = o.Sound;
         Volume = o.Volume;
@@ -224,6 +285,11 @@ public class AppData
     public string AlarmSort { get; set; } = "Soonest";
     public bool ShowWidget { get; set; }
     public bool HotkeysEnabled { get; set; } = true;
+
+    // Vacation mode: no alarms (or none in VacationGroup) ring until VacationUntil.
+    public DateTime? VacationUntil { get; set; }
+    public string? VacationGroup { get; set; }
+    public bool BriefingAloud { get; set; } = true;
 
     // Deep Work
     public int FocusMinutes { get; set; } = 25;

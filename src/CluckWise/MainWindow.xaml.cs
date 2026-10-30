@@ -32,7 +32,8 @@ public partial class MainWindow : Window
         if (NavTasks != null) UpdateTaskCount();
         foreach (var c in App.Current.Data.WorldClocks) c.Refresh(now);
         DateText.Text = now.ToString("dddd, d MMMM yyyy");
-        var next = Scheduler.NextAlarm(App.Current.Data.Alarms, now);
+        var next = Scheduler.NextAlarm(App.Current.Data.Alarms.Where(a => !a.IsNew), now);
+        _next = next;
         if (next is { } n)
         {
             NextText.Text = $"{TimeFormat.Time(n.when)} · {n.alarm.Label}";
@@ -43,6 +44,156 @@ public partial class MainWindow : Window
             NextText.Text = "No alarms on";
             NextWhen.Text = "Turn on an alarm or add a new one";
         }
+        // "Skip once" only makes sense for a normal upcoming ring (not a snooze or a quick nap).
+        SkipOnceButton.Visibility = next is { } nn && nn.alarm.SnoozedUntil == null && !nn.alarm.DeleteAfterRing
+            ? Visibility.Visible : Visibility.Collapsed;
+        UpdateVacationBanner();
+    }
+
+    private (Alarm alarm, DateTime when)? _next;
+
+    // ---- Skip next time --------------------------------------------------------------
+
+    private void SkipOnce_Click(object sender, RoutedEventArgs e)
+    {
+        if (_next is not { } n) return;
+        Skip(n.alarm, n.when);
+    }
+
+    private void Skip(Alarm alarm, DateTime when)
+    {
+        alarm.SkipOccurrence = when;
+        alarm.Refresh();
+        App.Current.SaveData();
+        RefreshList();
+        ShowUndo($"Skipping {alarm.Label} on {when:ddd} {TimeFormat.Time(when)}", () =>
+        {
+            alarm.SkipOccurrence = null;
+            alarm.Refresh();
+            App.Current.SaveData();
+            RefreshList();
+        });
+    }
+
+    private static Alarm? AlarmOf(object sender) =>
+        (sender as FrameworkElement)?.DataContext as Alarm
+        ?? ((sender as System.Windows.Controls.MenuItem)?.Parent as System.Windows.Controls.ContextMenu)?.DataContext as Alarm;
+
+    /// <summary>Sets the menu text to "Skip next time (Mon 6:30 AM)" or "Undo skip".</summary>
+    private void Card_ContextMenuOpening(object sender, System.Windows.Controls.ContextMenuEventArgs e)
+    {
+        if (sender is not FrameworkElement fe || fe.DataContext is not Alarm a || fe.ContextMenu?.Items[0] is not System.Windows.Controls.MenuItem skip) return;
+        if (a.SkipOccurrence != null) skip.Header = "Undo skip (" + a.SkipText + ")";
+        else if (a.Enabled && Scheduler.NextOccurrence(a, DateTime.Now) is { } n) skip.Header = $"Skip next time ({n:ddd} {TimeFormat.Time(n)})";
+        else skip.Header = "Skip next time";
+        skip.IsEnabled = a.SkipOccurrence != null || (a.Enabled && Scheduler.NextOccurrence(a, DateTime.Now) != null);
+    }
+
+    private void CardSkip_Click(object sender, RoutedEventArgs e)
+    {
+        if (AlarmOf(sender) is not { } a) return;
+        if (a.SkipOccurrence != null)
+        {
+            a.SkipOccurrence = null;
+            a.Refresh();
+            App.Current.SaveData();
+            RefreshList();
+        }
+        else if (Scheduler.NextOccurrence(a, DateTime.Now) is { } n) Skip(a, n);
+    }
+
+    private void CardRingNow_Click(object sender, RoutedEventArgs e)
+    {
+        if (AlarmOf(sender) is not { } a) return;
+        var test = a.Clone();
+        test.Label += " (test)";
+        test.Actions = new();
+        new RingWindow(test) { Owner = this }.Show();
+    }
+
+    private void CardDuplicate_Click(object sender, RoutedEventArgs e)
+    {
+        if (AlarmOf(sender) is not { } a) return;
+        var copy = a.Clone();
+        copy.Id = Guid.NewGuid();
+        copy.Label = a.Label + " (copy)";
+        copy.LastRung = null;
+        copy.SkipOccurrence = null;
+        App.Current.Data.Alarms.Add(copy);
+        App.Current.SaveData();
+        RefreshList();
+        Expand(copy);
+    }
+
+    // ---- Quick nap -------------------------------------------------------------------
+
+    private void Nap_Click(object sender, RoutedEventArgs e)
+    {
+        var menu = NapButton.ContextMenu;
+        menu.PlacementTarget = NapButton;
+        menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+        menu.IsOpen = true;
+    }
+
+    private void NapItem_Click(object sender, RoutedEventArgs e) =>
+        App.Current.QuickNap(int.Parse((string)((System.Windows.Controls.MenuItem)sender).Tag));
+
+    // ---- Vacation mode ---------------------------------------------------------------
+
+    private void Vacation_Click(object sender, RoutedEventArgs e)
+    {
+        var data = App.Current.Data;
+        VacationGroupBox.Items.Clear();
+        VacationGroupBox.Items.Add("All alarms");
+        foreach (var g in Groups.All(data)) VacationGroupBox.Items.Add("Only " + g);
+        VacationGroupBox.SelectedIndex = 0;
+        VacationDate.SelectedDate = data.VacationUntil?.Date ?? DateTime.Today.AddDays(7);
+        VacationDate.DisplayDateStart = DateTime.Today.AddDays(1);
+        VacationError.Visibility = Visibility.Collapsed;
+        VacationForm.Visibility = Visibility.Visible;
+    }
+
+    private void VacationStart_Click(object sender, RoutedEventArgs e)
+    {
+        if (VacationDate.SelectedDate is not { } back || back.Date <= DateTime.Today)
+        {
+            VacationError.Text = "Pick the day you're back (tomorrow or later).";
+            VacationError.Visibility = Visibility.Visible;
+            return;
+        }
+        var data = App.Current.Data;
+        data.VacationUntil = back.Date;
+        data.VacationGroup = VacationGroupBox.SelectedIndex <= 0 ? null : ((string)VacationGroupBox.SelectedItem)["Only ".Length..];
+        Scheduler.ApplyVacation(data);
+        App.Current.SaveData();
+        VacationForm.Visibility = Visibility.Collapsed;
+        RefreshList();
+        WakeTimer.Update(data);
+    }
+
+    private void VacationCancel_Click(object sender, RoutedEventArgs e) => VacationForm.Visibility = Visibility.Collapsed;
+
+    private void VacationEnd_Click(object sender, RoutedEventArgs e)
+    {
+        var data = App.Current.Data;
+        data.VacationUntil = null;
+        data.VacationGroup = null;
+        Scheduler.ApplyVacation(data);
+        App.Current.SaveData();
+        RefreshList();
+        WakeTimer.Update(data);
+    }
+
+    private void UpdateVacationBanner()
+    {
+        var data = App.Current.Data;
+        if (data.VacationUntil is { } back)
+        {
+            var which = data.VacationGroup == null ? "All alarms are" : $"\u201c{data.VacationGroup}\u201d alarms are";
+            VacationText.Text = $"Vacation mode: {which} paused until you're back on {back:dddd d MMMM}.";
+            VacationBanner.Visibility = Visibility.Visible;
+        }
+        else VacationBanner.Visibility = Visibility.Collapsed;
     }
 
     public void NewAlarm()

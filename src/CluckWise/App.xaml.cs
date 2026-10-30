@@ -47,6 +47,7 @@ public partial class App : Application
         Morning.ResetIfNewDay(Data);
         Scheduler = new Scheduler(Data);
         Scheduler.AlarmDue += OnAlarmDue;
+        Scheduler.VacationEnded += () => { SaveData(); ShowTrayMessage("Welcome back!", "Vacation mode is over. Your alarms are on again."); _main?.RefreshList(); };
         Scheduler.BirthdayDue += b => { SaveData(); new CelebrationWindow(b).Show(); };
         Scheduler.TaskDue += t => { SaveData(); ShowOrQueue(() => new TaskReminderWindow(t).Show()); };
         Scheduler.BirthdayTomorrow += b =>
@@ -160,6 +161,32 @@ public partial class App : Application
         SaveData();
     }
 
+    /// <summary>A one-off alarm N minutes from now that removes itself once dismissed.</summary>
+    public void QuickNap(int minutes)
+    {
+        var at = DateTime.Now.AddMinutes(minutes);
+        var nap = new Alarm
+        {
+            Label = minutes == 20 ? "Power nap" : minutes >= 60 ? "Nap (1 hour)" : $"Nap ({minutes} min)",
+            Group = Groups.Default,
+            Repeat = RepeatMode.Once,
+            OnceDate = at.Date.AddYears(-1), // never rings by schedule, only via SnoozedUntil
+            Hour = at.Hour,
+            Minute = at.Minute,
+            Enabled = false,          // rings once via SnoozedUntil, to the second
+            SnoozedUntil = at,
+            DeleteAfterRing = true,
+            Sound = Data.DefaultSound,
+            SnoozeMinutes = 5,
+            GentleWake = true,
+            WakeComputer = true,
+        };
+        Data.Alarms.Add(nap);
+        SaveData();
+        RefreshAlarmList();
+        ShowTrayMessage(nap.Label, $"I'll wake you at {TimeFormat.Time(at)}.");
+    }
+
     public void RefreshAlarmList() => _main?.RefreshList();
     public void TasksChanged() => _main?.UpdateTaskCount();
 
@@ -201,6 +228,13 @@ public partial class App : Application
         var menu = new Forms.ContextMenuStrip();
         menu.Items.Add("Open CluckWise", null, (_, _) => ShowMain());
         menu.Items.Add("New alarm…", null, (_, _) => { ShowMain(); _main?.NewAlarm(); });
+        var nap = new Forms.ToolStripMenuItem("Quick nap");
+        foreach (var m in new[] { 10, 20, 30, 60 })
+        {
+            int minutes = m;
+            nap.DropDownItems.Add(minutes == 60 ? "1 hour" : $"{minutes} minutes" + (minutes == 20 ? " (power nap)" : ""), null, (_, _) => QuickNap(minutes));
+        }
+        menu.Items.Add(nap);
         _widgetMenuItem = new Forms.ToolStripMenuItem("Floating widget") { CheckOnClick = false };
         _widgetMenuItem.Click += (_, _) => SetWidgetVisible(!WidgetVisible);
         menu.Items.Add(_widgetMenuItem);

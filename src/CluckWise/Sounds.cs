@@ -25,6 +25,20 @@ public static class Sounds
     private const double GentleSeconds = 20;
 
     private static MediaPlayer? _player;
+    private static double _baseVolume = 1;
+    private static bool _ducked;
+
+    /// <summary>Turns the alarm sound down to a quarter while CluckWise is speaking.</summary>
+    public static void Duck(bool on)
+    {
+        _ducked = on;
+        ApplyVolume();
+    }
+
+    private static void ApplyVolume()
+    {
+        if (_player != null) _player.Volume = _baseVolume * (_ducked ? 0.25 : 1);
+    }
     private static System.Media.SoundPlayer? _fallback;
     private static DispatcherTimer? _ramp;
 
@@ -42,7 +56,8 @@ public static class Sounds
         _player.MediaFailed += (_, _) => PlayFallback(path, loop);
         _player.Open(new Uri(path));
         if (loop) _player.MediaEnded += (_, _) => { _player.Position = TimeSpan.Zero; _player.Play(); };
-        _player.Volume = gentle ? target * GentleStart : target;
+        _baseVolume = gentle ? target * GentleStart : target;
+        ApplyVolume();
         _player.Play();
 
         if (gentle)
@@ -52,7 +67,8 @@ public static class Sounds
             _ramp.Tick += (_, _) =>
             {
                 var t = Math.Min(1.0, (DateTime.Now - started).TotalSeconds / GentleSeconds);
-                if (_player != null) _player.Volume = target * (GentleStart + (1 - GentleStart) * t);
+                _baseVolume = target * (GentleStart + (1 - GentleStart) * t);
+                ApplyVolume();
                 if (t >= 1.0) _ramp?.Stop();
             };
             _ramp.Start();

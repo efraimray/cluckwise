@@ -26,4 +26,9 @@
     <Resource Include="Assets\logo.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Windows' built-in text-to-speech, for the talking alarm and morning briefing -->
+    <PackageReference Include="System.Speech" Version="8.0.0" />
+  </ItemGroup>
+
 </Project>

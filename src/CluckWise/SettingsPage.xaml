@@ -42,6 +42,14 @@
           </DockPanel>
           <Border Height="1" Background="{DynamicResource Line}"/>
           <DockPanel Margin="0,10">
+            <CheckBox x:Name="BriefingSwitch" DockPanel.Dock="Right" Style="{StaticResource Switch}" Click="Briefing_Click"/>
+            <StackPanel VerticalAlignment="Center">
+              <TextBlock Text="Read the morning briefing aloud" FontSize="15" FontWeight="SemiBold"/>
+              <TextBlock Text="For alarms with &#x201C;Say it out loud&#x201D; on: today's tasks, birthdays and your next alarm" FontSize="13" Foreground="{DynamicResource Muted}" TextWrapping="Wrap"/>
+            </StackPanel>
+          </DockPanel>
+          <Border Height="1" Background="{DynamicResource Line}"/>
+          <DockPanel Margin="0,10">
             <CheckBox x:Name="TodoSwitch" DockPanel.Dock="Right" Style="{StaticResource Switch}" Click="Todo_Click"/>
             <StackPanel VerticalAlignment="Center">
               <TextBlock Text="Show morning to-do after morning alarms" FontSize="15" FontWeight="SemiBold"/>

@@ -70,11 +70,18 @@ public partial class AlarmEditorPanel : UserControl
         HourBox.SelectedIndex = TimeFormat.Use24Hour ? _edit.Hour : (_edit.Hour % 12 == 0 ? 12 : _edit.Hour % 12) - 1;
         MinuteBox.SelectedIndex = _edit.Minute;
         AmPmBox.SelectedIndex = _edit.Hour < 12 ? 0 : 1;
-        OnceRadio.IsChecked = _edit.Repeat == RepeatMode.Once;
-        DailyRadio.IsChecked = _edit.Repeat == RepeatMode.Daily;
-        WeeklyRadio.IsChecked = _edit.Repeat == RepeatMode.Weekly;
-        MonthlyRadio.IsChecked = _edit.Repeat == RepeatMode.Monthly;
-        YearlyRadio.IsChecked = _edit.Repeat == RepeatMode.Yearly;
+        for (int w = 1; w <= 4; w++) WeeksBox.Items.Add(w == 1 ? "week" : $"{w} weeks");
+        for (int d = 2; d <= 30; d++) EveryDaysBox.Items.Add($"{d} days");
+        RepeatBox.SelectedIndex = Array.IndexOf(RepeatOrder, _edit.Repeat) is var ri && ri >= 0 ? ri : 2;
+        WeeksBox.SelectedIndex = Math.Clamp(_edit.IntervalWeeks, 1, 4) - 1;
+        EveryDaysBox.SelectedIndex = Math.Clamp(_edit.IntervalDays, 2, 30) - 2;
+        NthWeekBox.SelectedIndex = Math.Clamp(_edit.NthWeek, 1, 5) - 1;
+        NthDayBox.SelectedIndex = Math.Clamp(_edit.NthDay, 0, 6);
+        _dates = _edit.SpecificDates.Select(d => d.Date).Distinct().ToList();
+        AddDatePicker.SelectedDate = DateTime.Today;
+        RefreshDates();
+        EndBox.IsChecked = _edit.EndDate != null;
+        EndDatePicker.SelectedDate = _edit.EndDate ?? DateTime.Today.AddMonths(3);
         for (int i = 0; i < 7; i++) _days[i].IsChecked = _edit.Days[i];
         OnceDatePicker.SelectedDate = _edit.Repeat == RepeatMode.Once && _edit.OnceDate < DateTime.Today ? DateTime.Today : _edit.OnceDate;
         LabelBox.Text = _edit.Label;
@@ -88,6 +95,10 @@ public partial class AlarmEditorPanel : UserControl
         ReminderBox.SelectedItem = _edit.ReminderMinutes > 0 ? $"{_edit.ReminderMinutes} min before" : "Off";
         if (ReminderBox.SelectedIndex < 0) ReminderBox.SelectedIndex = 0;
         WakeBox.IsChecked = _edit.WakeComputer;
+        foreach (var k in Enum.GetValues<ChallengeKind>()) ChallengeBox.Items.Add(WakeChallenge.Describe(k));
+        ChallengeBox.SelectedIndex = (int)_edit.Challenge;
+        LevelBox.SelectedIndex = Math.Clamp(_edit.ChallengeLevel, 1, 3) - 1;
+        SpeakBox.IsChecked = _edit.SpeakOnRing;
         EnabledBox.IsChecked = isNew || _edit.Enabled;
         RefreshActions();
 
@@ -141,6 +152,38 @@ public partial class AlarmEditorPanel : UserControl
         return null;
     }
 
+    /// <summary>The Repeat dropdown's items, in order.</summary>
+    private static readonly RepeatMode[] RepeatOrder =
+    {
+        RepeatMode.Once, RepeatMode.Daily, RepeatMode.Weekly, RepeatMode.EveryNDays,
+        RepeatMode.Monthly, RepeatMode.MonthlyWeekday, RepeatMode.Yearly, RepeatMode.Dates,
+    };
+
+    private static void Show(UIElement e, bool on) => e.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+
+    private List<DateTime> _dates = new();
+
+    private record DateChip(DateTime Date, string Text);
+
+    private void RefreshDates()
+    {
+        DatesList.ItemsSource = _dates.OrderBy(d => d).Select(d => new DateChip(d, d.ToString("ddd d MMM yyyy"))).ToList();
+        if (!_loading) UpdateState();
+    }
+
+    private void AddDate_Click(object sender, RoutedEventArgs e)
+    {
+        if (AddDatePicker.SelectedDate is { } d && !_dates.Contains(d.Date)) _dates.Add(d.Date);
+        // Suggest the next day, handy when adding several in a row.
+        if (AddDatePicker.SelectedDate is { } last) AddDatePicker.SelectedDate = last.AddDays(1);
+        RefreshDates();
+    }
+
+    private void RemoveDate_Click(object sender, RoutedEventArgs e)
+    {
+        if (((FrameworkElement)sender).Tag is DateTime d) { _dates.Remove(d); RefreshDates(); }
+    }
+
     private void Changed(object sender, RoutedEventArgs e) => UpdateState();
 
     /// <summary>Copies the form into the working copy and refreshes the summary line.</summary>
@@ -154,20 +197,35 @@ public partial class AlarmEditorPanel : UserControl
             _edit.Hour = hour12 % 12 + (AmPmBox.SelectedIndex == 1 ? 12 : 0);
         }
         _edit.Minute = Math.Max(0, MinuteBox.SelectedIndex);
-        _edit.Repeat = OnceRadio.IsChecked == true ? RepeatMode.Once
-                     : DailyRadio.IsChecked == true ? RepeatMode.Daily
-                     : MonthlyRadio.IsChecked == true ? RepeatMode.Monthly
-                     : YearlyRadio.IsChecked == true ? RepeatMode.Yearly : RepeatMode.Weekly;
+        _edit.Repeat = RepeatBox.SelectedIndex >= 0 ? RepeatOrder[RepeatBox.SelectedIndex] : RepeatMode.Weekly;
         _edit.Days = _days.Select(d => d.IsChecked == true).ToArray();
         _edit.OnceDate = OnceDatePicker.SelectedDate ?? DateTime.Today;
         _edit.ExtraTimes = _extraTimes.ToList();
+        _edit.IntervalWeeks = Math.Max(0, WeeksBox.SelectedIndex) + 1;
+        _edit.IntervalDays = Math.Max(0, EveryDaysBox.SelectedIndex) + 2;
+        _edit.NthWeek = Math.Max(0, NthWeekBox.SelectedIndex) + 1;
+        _edit.NthDay = Math.Max(0, NthDayBox.SelectedIndex);
+        _edit.SpecificDates = _dates.ToList();
+        _edit.Challenge = (ChallengeKind)Math.Max(0, ChallengeBox.SelectedIndex);
+        _edit.ChallengeLevel = Math.Max(0, LevelBox.SelectedIndex) + 1;
+        Show(LevelBox, _edit.Challenge != ChallengeKind.None);
+        _edit.EndDate = EndBox.IsChecked == true && _edit.Repeat is not (RepeatMode.Once or RepeatMode.Dates) ? EndDatePicker.SelectedDate?.Date : null;
 
-        DaysPanel.Visibility = _edit.Repeat == RepeatMode.Weekly ? Visibility.Visible : Visibility.Collapsed;
-        DateRow.Visibility = _edit.Repeat is RepeatMode.Once or RepeatMode.Monthly or RepeatMode.Yearly ? Visibility.Visible : Visibility.Collapsed;
-        DateHint.Text = _edit.Repeat switch
+        var mode = _edit.Repeat;
+        Show(DaysPanel, mode == RepeatMode.Weekly);
+        Show(WeeksRow, mode == RepeatMode.Weekly);
+        Show(EveryDaysRow, mode == RepeatMode.EveryNDays);
+        Show(NthRow, mode == RepeatMode.MonthlyWeekday);
+        Show(DatesRow, mode == RepeatMode.Dates);
+        Show(EndRow, mode is not (RepeatMode.Once or RepeatMode.Dates));
+        EndDatePicker.IsEnabled = EndBox.IsChecked == true;
+        bool startDate = mode == RepeatMode.EveryNDays || (mode == RepeatMode.Weekly && _edit.IntervalWeeks > 1);
+        Show(DateRow, mode is RepeatMode.Once or RepeatMode.Monthly or RepeatMode.Yearly || startDate);
+        DateLabel.Text = startDate ? "Starting" : "On";
+        DateHint.Text = mode switch
         {
-            RepeatMode.Monthly => _edit.RepeatText + (_edit.OnceDate.Day > 28 ? " (last day in shorter months)" : ""),
-            RepeatMode.Yearly => _edit.RepeatText,
+            RepeatMode.Monthly => _edit.OnceDate.Day >= 29 ? "Uses the last day in shorter months" : "",
+            RepeatMode.Weekly when startDate => "Counts weeks from this date",
             _ => "",
         };
 
@@ -175,7 +233,10 @@ public partial class AlarmEditorPanel : UserControl
         var next = Scheduler.NextOccurrence(_edit, DateTime.Now);
         SummaryText.Text = next is { } n
             ? $"Rings {n:dddd d MMM} at {TimeFormat.Time(n)} · in {Scheduler.Humanize(n - DateTime.Now)}"
-            : _edit.Repeat == RepeatMode.Weekly ? "Pick at least one day" : "That time has already passed";
+            : _edit.Repeat == RepeatMode.Weekly && !_edit.Days.Any(d => d) ? "Pick at least one day"
+            : _edit.Repeat == RepeatMode.Dates && _dates.Count == 0 ? "Add at least one date"
+            : _edit.EndDate != null ? "It ends before it could ring; move the end date"
+            : "That time has already passed";
     }
 
     private List<int> _extraTimes = new();
@@ -394,6 +455,12 @@ public partial class AlarmEditorPanel : UserControl
     private void Save_Click(object sender, RoutedEventArgs e)
     {
         UpdateState();
+        if (_edit.Repeat == RepeatMode.Dates && _dates.Count == 0)
+        {
+            SummaryText.Text = "Add at least one date, or choose another repeat.";
+            SummaryText.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xE5, 0x48, 0x4D));
+            return;
+        }
         if (_edit.Repeat == RepeatMode.Weekly && !_edit.Days.Any(d => d))
         {
             SummaryText.Text = "Pick at least one day, or choose Once or Every day.";
@@ -409,6 +476,7 @@ public partial class AlarmEditorPanel : UserControl
         _edit.SnoozeMinutes = int.Parse(((string)SnoozeBox.SelectedItem).Split(' ')[0]);
         _edit.RunSilently = SilentBox.IsChecked == true;
         _edit.WakeComputer = WakeBox.IsChecked == true;
+        _edit.SpeakOnRing = SpeakBox.IsChecked == true;
         _edit.ReminderMinutes = ReminderBox.SelectedIndex <= 0 ? 0 : int.Parse(((string)ReminderBox.SelectedItem).Split(' ')[0]);
         _edit.Enabled = EnabledBox.IsChecked == true;
         _edit.Actions = _actions.ToList();
@@ -429,6 +497,7 @@ public partial class AlarmEditorPanel : UserControl
         test.Sound = SoundBox.SelectedItem as string ?? Sounds.RoosterCrow;
         test.Volume = (int)VolumeSlider.Value;
         test.GentleWake = GentleBox.IsChecked == true;
+        test.SpeakOnRing = SpeakBox.IsChecked == true;
         test.Actions = new();
         new RingWindow(test) { Owner = Window.GetWindow(this) }.Show();
     }

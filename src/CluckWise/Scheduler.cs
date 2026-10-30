@@ -26,9 +26,19 @@ public class Scheduler
     private static readonly TimeSpan BirthdayTime = new(9, 0, 0);
     private DateTime _lastWakeUpdate = DateTime.MinValue;
 
+    /// <summary>Raised when vacation mode ends by itself.</summary>
+    public event Action? VacationEnded;
+
+    public static void ApplyVacation(AppData data)
+    {
+        VacationUntil = data.VacationUntil;
+        VacationGroup = data.VacationGroup;
+    }
+
     public Scheduler(AppData data)
     {
         _data = data;
+        ApplyVacation(data);
         _timer.Tick += (_, _) => Check();
     }
 
@@ -106,6 +116,16 @@ public class Scheduler
             }
         }
 
+        foreach (var alarm in _data.Alarms)
+            if (alarm.SkipOccurrence is { } skip && skip < now) { alarm.SkipOccurrence = null; alarm.Refresh(); }
+        if (_data.VacationUntil is { } back && back <= now)
+        {
+            _data.VacationUntil = null;
+            _data.VacationGroup = null;
+            ApplyVacation(_data);
+            VacationEnded?.Invoke();
+        }
+
         Morning.ResetIfNewDay(_data);
         _lastCheck = now;
         foreach (var alarm in _data.Alarms) alarm.Countdown = CountdownText(alarm, now);
@@ -123,23 +143,90 @@ public class Scheduler
         return due is { } d && d <= now && now - d <= CatchUpWindow && alarm.LastRung != d ? d : null;
     }
 
-    /// <summary>The first time strictly after <paramref name="after"/> that the alarm should ring.</summary>
+    /// <summary>
+    /// Vacation mode: alarms (all, or one group) don't ring until this moment. Set from AppData by the app.
+    /// </summary>
+    public static DateTime? VacationUntil { get; set; }
+    public static string? VacationGroup { get; set; }
+
+    public static bool IsOnVacation(Alarm alarm, DateTime at) =>
+        VacationUntil is { } until && at < until
+        && (VacationGroup == null || string.Equals(VacationGroup, alarm.Group, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// The first time strictly after <paramref name="after"/> that the alarm should ring,
+    /// honouring vacation mode, "skip next time" and the alarm's end date.
+    /// </summary>
     public static DateTime? NextOccurrence(Alarm alarm, DateTime after)
+    {
+        // On vacation: look for the first ring from the day you're back.
+        if (IsOnVacation(alarm, after) && VacationUntil is { } back) after = back.AddTicks(-1);
+
+        var next = NextRaw(alarm, after);
+        if (next is { } n && alarm.SkipOccurrence == n) next = NextRaw(alarm, n);
+        if (next is { } m && alarm.Repeat != RepeatMode.Once && alarm.EndDate is { } end && m.Date > end.Date) return null;
+        return next;
+    }
+
+    private static DateTime? NextRaw(Alarm alarm, DateTime after)
     {
         // An alarm can ring at several times a day (e.g. a class at 9:00 and 18:00): take the soonest.
         DateTime? best = null;
         foreach (var time in alarm.AllTimes())
         {
-            var next = NextOccurrence(alarm, after, time);
+            var next = NextFor(alarm, after, time);
             if (next is { } n && (best is null || n < best)) best = n;
         }
         return best;
     }
 
-    private static DateTime? NextOccurrence(Alarm alarm, DateTime after, TimeSpan time)
+    // Weeks are counted from a fixed Sunday so "every 2 weeks" lines up with the start date's week.
+    private static int WeekIndex(DateTime d) => (int)Math.Floor((d.Date - new DateTime(2000, 1, 2)).TotalDays / 7);
+
+    /// <summary>The Nth (1–4) or last (5) given weekday of a month, e.g. the first Monday.</summary>
+    public static DateTime NthWeekday(int year, int month, int nth, DayOfWeek day)
+    {
+        if (nth >= 5)
+        {
+            var last = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+            return last.AddDays(-(((int)last.DayOfWeek - (int)day + 7) % 7));
+        }
+        var first = new DateTime(year, month, 1);
+        return first.AddDays(((int)day - (int)first.DayOfWeek + 7) % 7 + 7 * (nth - 1));
+    }
+
+    private static DateTime? NextFor(Alarm alarm, DateTime after, TimeSpan time)
     {
         switch (alarm.Repeat)
         {
+            case RepeatMode.EveryNDays:
+            {
+                int n = Math.Max(1, alarm.IntervalDays);
+                var anchor = alarm.OnceDate.Date;
+                var start = after.Date < anchor ? anchor : after.Date;
+                for (int i = 0; i <= n + 1; i++)
+                {
+                    var day = start.AddDays(i);
+                    if ((day - anchor).Days % n != 0) continue;
+                    var candidate = day + time;
+                    if (candidate > after) return candidate;
+                }
+                return null;
+            }
+
+            case RepeatMode.MonthlyWeekday:
+                for (int i = 0; i <= 2; i++)
+                {
+                    var month = new DateTime(after.Year, after.Month, 1).AddMonths(i);
+                    var candidate = NthWeekday(month.Year, month.Month, alarm.NthWeek, (DayOfWeek)alarm.NthDay) + time;
+                    if (candidate > after) return candidate;
+                }
+                return null;
+
+            case RepeatMode.Dates:
+                return alarm.SpecificDates.Select(d => d.Date + time).Where(c => c > after).OrderBy(c => c)
+                    .Select(c => (DateTime?)c).FirstOrDefault();
+
             case RepeatMode.Once:
                 var once = alarm.OnceDate.Date + time;
                 return once > after ? once : null;
@@ -170,21 +257,32 @@ public class Scheduler
                 return null;
 
             default:
-                for (int i = 0; i <= 7; i++)
+            {
+                // Weekly on chosen days; with IntervalWeeks > 1, only in weeks that line up with the start date.
+                int every = Math.Max(1, alarm.IntervalWeeks);
+                int anchorWeek = WeekIndex(alarm.OnceDate);
+                var from = every > 1 && after.Date < alarm.OnceDate.Date ? alarm.OnceDate.Date.AddTicks(-1) : after;
+                for (int i = 0; i <= 7 * every + 7; i++)
                 {
-                    var candidate = after.Date.AddDays(i) + time;
-                    if (candidate > after && alarm.Days[(int)candidate.DayOfWeek]) return candidate;
+                    var candidate = from.Date.AddDays(i) + time;
+                    if (candidate <= after || candidate <= from || !alarm.Days[(int)candidate.DayOfWeek]) continue;
+                    if (every > 1 && (WeekIndex(candidate) - anchorWeek) % every != 0) continue;
+                    return candidate;
                 }
                 return null;
+            }
         }
     }
 
     public static string CountdownText(Alarm alarm, DateTime now)
     {
-        if (alarm.SnoozedUntil is { } s) return "Snoozed until " + TimeFormat.Time(s);
+        if (alarm.SnoozedUntil is { } s) return (alarm.DeleteAfterRing ? "Rings at " : "Snoozed until ") + TimeFormat.Time(s);
         if (!alarm.Enabled) return "Off";
         if (NextOccurrence(alarm, now) is not { } next) return "Not scheduled";
-        return "in " + Humanize(next - now);
+        var text = "in " + Humanize(next - now);
+        if (IsOnVacation(alarm, now)) text = "Paused · " + text;
+        else if (alarm.SkipOccurrence is { } skip && skip > now) text += " (skipping " + skip.ToString("ddd") + ")";
+        return text;
     }
 
     public static string Humanize(TimeSpan span)

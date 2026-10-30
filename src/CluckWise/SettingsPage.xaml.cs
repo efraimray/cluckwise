@@ -26,6 +26,7 @@ public partial class SettingsPage : UserControl
         VersionText.Text = $"CluckWise {v?.Major}.{v?.Minor}.{v?.Build}";
         TodoSwitch.IsChecked = data.ShowTodoAfterMorningAlarm;
         Clock24Switch.IsChecked = data.Use24Hour;
+        BriefingSwitch.IsChecked = data.BriefingAloud;
         DarkSwitch.IsChecked = data.DarkMode;
         _zones = CityZones.All();
         FilterZones();
@@ -82,6 +83,12 @@ public partial class SettingsPage : UserControl
 
     private void Widget_Click(object sender, RoutedEventArgs e) =>
         App.Current.SetWidgetVisible(WidgetSwitch.IsChecked == true);
+
+    private void Briefing_Click(object sender, RoutedEventArgs e)
+    {
+        App.Current.Data.BriefingAloud = BriefingSwitch.IsChecked == true;
+        App.Current.SaveData();
+    }
 
     private void Dark_Click(object sender, RoutedEventArgs e)
     {

@@ -15,11 +15,34 @@
     <Button x:Name="SnoozeButton" Style="{StaticResource SecondaryButton}" Height="48" Click="Snooze_Click"/>
     <TextBlock Text="Space to dismiss · S to snooze" FontSize="12" Foreground="#9C9286" HorizontalAlignment="Center" Margin="0,12,0,0"/>
   </StackPanel>
+  <StackPanel x:Name="ChallengePanel" Margin="32,28" Visibility="Collapsed">
+    <TextBlock Text="WAKE-UP CHALLENGE" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource Yolk}" HorizontalAlignment="Center"/>
+    <TextBlock x:Name="ChallengeTitle" FontSize="20" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="0,8,0,4"/>
+    <TextBlock x:Name="ChallengeHint" FontSize="13" Foreground="{DynamicResource SideText}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,16"/>
+    <TextBlock x:Name="ChallengeQuestion" FontSize="40" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,14"/>
+    <TextBox x:Name="ChallengeInput" Style="{StaticResource Field}" Height="50" FontSize="18" Margin="0,0,0,10"/>
+    <UniformGrid x:Name="TileGrid" Margin="0,0,0,10"/>
+    <TextBlock x:Name="ChallengeError" Foreground="#FF8A80" FontSize="13" HorizontalAlignment="Center" Margin="0,0,0,8" Visibility="Collapsed" TextWrapping="Wrap" TextAlignment="Center"/>
+    <Button x:Name="ChallengeCheck" Style="{StaticResource PrimaryButton}" Content="Check" Height="50" FontSize="16" Margin="0,4,0,10" Click="ChallengeCheck_Click"/>
+    <Button x:Name="ChallengeSnooze" Style="{StaticResource SecondaryButton}" Height="44" Click="Snooze_Click"/>
+  </StackPanel>
   <StackPanel x:Name="TodoPanel" Margin="32,28" Visibility="Collapsed" TextElement.Foreground="White">
     <Image Source="pack://application:,,,/Assets/logo.png" Width="64" Height="64" Margin="0,0,0,8"/>
     <TextBlock Text="GOOD MORNING" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource Yolk}" HorizontalAlignment="Center"/>
     <TextBlock x:Name="StreakText" FontSize="24" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" Margin="0,6,0,2" TextAlignment="Center" TextWrapping="Wrap"/>
     <TextBlock x:Name="StreakHint" FontSize="13" Foreground="{DynamicResource SideText}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,18"/>
+    <Border x:Name="BriefingBox" Background="{DynamicResource InkSoft}" CornerRadius="16" Padding="18,12" Margin="0,0,0,12" Visibility="Collapsed">
+      <StackPanel>
+        <TextBlock Text="Today" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,0,0,6"/>
+        <ItemsControl x:Name="BriefingList">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding}" FontSize="13" Foreground="{DynamicResource SideText}" TextWrapping="Wrap" Margin="0,2"/>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </Border>
     <Border Background="{DynamicResource InkSoft}" CornerRadius="16" Padding="18,12">
       <StackPanel>
         <TextBlock Text="Your morning plan" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,0,0,8"/>

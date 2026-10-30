@@ -10,6 +10,11 @@
 
 - **Alarms**: one-time, every day, chosen weekdays, monthly (e.g. "pay rent on the 1st") or yearly, organised into groups (Morning, Work, Exercise…). Edit them inline by clicking a card.
 - **Several times in one alarm**: e.g. "John's Class" at 9:00 AM and 6:00 PM.
+- **More repeat options**: every 2 weeks, every few days, "first Monday" or "last Friday" of the month, specific dates, and end dates.
+- **Skip next time** and **vacation mode**: skip one ring without turning the alarm off, or pause all alarms (or one group) until you're back.
+- **Wake-up challenge**: solve a maths problem, type a phrase, or tap numbers in order before Dismiss works.
+- **Talking alarm and morning briefing**: CluckWise says the time and label, then reads today's tasks, birthdays and next alarm.
+- **Quick nap** from the tray or the Alarms page: 10, 20, 30 or 60 minutes, removed once dismissed.
 - **Snooze and gentle wake-up**: the volume rises over 30 seconds. Choose a snooze length per alarm.
 - **Original sounds**: Rooster Crow, Sunrise Chime, Gentle Beep, Classic Bell and Marimba, all synthesised in code. You can also use your own MP3/WAV files.
 - **"When it rings…" actions**: open a website, app, file or folder automatically. *Run silently* turns an alarm into a scheduled task.

@@ -20,7 +20,7 @@ public static class Morning
     public static event Action? Changed;
 
     /// <summary>Alarms set before noon count as morning alarms.</summary>
-    public static bool IsMorningAlarm(Alarm alarm) => alarm.Hour < 12;
+    public static bool IsMorningAlarm(Alarm alarm) => alarm.Hour < 12 && !alarm.DeleteAfterRing; // naps don't count
 
     /// <summary>Unticks everything once a new day starts.</summary>
     public static void ResetIfNewDay(AppData data)

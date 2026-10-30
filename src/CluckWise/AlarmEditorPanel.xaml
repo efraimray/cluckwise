@@ -90,17 +90,76 @@
         </Border>
 
         <TextBlock Style="{StaticResource SectionLabel}" Text="REPEAT"/>
-        <WrapPanel Margin="0,0,0,6">
-          <RadioButton x:Name="OnceRadio" Content="Once" GroupName="repeat" Margin="0,0,18,6" Checked="Changed"/>
-          <RadioButton x:Name="DailyRadio" Content="Every day" GroupName="repeat" Margin="0,0,18,6" Checked="Changed"/>
-          <RadioButton x:Name="WeeklyRadio" Content="Chosen days" GroupName="repeat" Margin="0,0,18,6" Checked="Changed"/>
-          <RadioButton x:Name="MonthlyRadio" Content="Monthly" GroupName="repeat" Margin="0,0,18,6" Checked="Changed"/>
-          <RadioButton x:Name="YearlyRadio" Content="Yearly" GroupName="repeat" Margin="0,0,0,6" Checked="Changed"/>
-        </WrapPanel>
+        <ComboBox x:Name="RepeatBox" Margin="0,0,0,10" SelectionChanged="Changed">
+          <ComboBoxItem Content="Once"/>
+          <ComboBoxItem Content="Every day"/>
+          <ComboBoxItem Content="Chosen days of the week"/>
+          <ComboBoxItem Content="Every few days (e.g. every 3 days)"/>
+          <ComboBoxItem Content="Monthly on a date (e.g. the 1st)"/>
+          <ComboBoxItem Content="Monthly on a weekday (e.g. first Monday)"/>
+          <ComboBoxItem Content="Yearly"/>
+          <ComboBoxItem Content="Specific dates"/>
+        </ComboBox>
+
         <StackPanel x:Name="DaysPanel" Orientation="Horizontal" Margin="0,0,0,10"/>
+        <StackPanel x:Name="WeeksRow" Orientation="Horizontal" Margin="0,0,0,10">
+          <TextBlock Text="Every" VerticalAlignment="Center" Margin="0,0,10,0"/>
+          <ComboBox x:Name="WeeksBox" Width="150" SelectionChanged="Changed"/>
+        </StackPanel>
+        <StackPanel x:Name="EveryDaysRow" Orientation="Horizontal" Margin="0,0,0,10">
+          <TextBlock Text="Every" VerticalAlignment="Center" Margin="0,0,10,0"/>
+          <ComboBox x:Name="EveryDaysBox" Width="150" SelectionChanged="Changed"/>
+        </StackPanel>
+        <StackPanel x:Name="NthRow" Orientation="Horizontal" Margin="0,0,0,10">
+          <TextBlock Text="The" VerticalAlignment="Center" Margin="0,0,10,0"/>
+          <ComboBox x:Name="NthWeekBox" Width="120" SelectionChanged="Changed">
+            <ComboBoxItem Content="First"/>
+            <ComboBoxItem Content="Second"/>
+            <ComboBoxItem Content="Third"/>
+            <ComboBoxItem Content="Fourth"/>
+            <ComboBoxItem Content="Last"/>
+          </ComboBox>
+          <ComboBox x:Name="NthDayBox" Width="150" Margin="8,0,0,0" SelectionChanged="Changed">
+            <ComboBoxItem Content="Sunday"/>
+            <ComboBoxItem Content="Monday"/>
+            <ComboBoxItem Content="Tuesday"/>
+            <ComboBoxItem Content="Wednesday"/>
+            <ComboBoxItem Content="Thursday"/>
+            <ComboBoxItem Content="Friday"/>
+            <ComboBoxItem Content="Saturday"/>
+          </ComboBox>
+          <TextBlock Text="of every month" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{DynamicResource Muted}"/>
+        </StackPanel>
         <StackPanel x:Name="DateRow" Orientation="Horizontal" Margin="0,0,0,10">
-          <DatePicker x:Name="OnceDatePicker" Width="200" SelectedDateChanged="Changed"/>
-          <TextBlock x:Name="DateHint" Foreground="{DynamicResource Muted}" FontSize="13" VerticalAlignment="Center" Margin="12,0,0,0"/>
+          <TextBlock x:Name="DateLabel" Text="On" VerticalAlignment="Center" Margin="0,0,10,0" MinWidth="56"/>
+          <DatePicker x:Name="OnceDatePicker" Width="190" SelectedDateChanged="Changed"/>
+          <TextBlock x:Name="DateHint" Foreground="{DynamicResource Muted}" FontSize="13" VerticalAlignment="Center" Margin="12,0,0,0" TextWrapping="Wrap" MaxWidth="220"/>
+        </StackPanel>
+        <StackPanel x:Name="DatesRow" Margin="0,0,0,10">
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+            <DatePicker x:Name="AddDatePicker" Width="190"/>
+            <Button Style="{StaticResource SecondaryButton}" Content="+ Add date" Height="40" Margin="8,0,0,0" Click="AddDate_Click"/>
+          </StackPanel>
+          <ItemsControl x:Name="DatesList">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Background="{DynamicResource YolkSoft}" BorderBrush="{DynamicResource Yolk}" BorderThickness="1" CornerRadius="12" Padding="12,4,4,4" Margin="0,0,8,8">
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Text}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <Button Content="✕" Width="26" Height="26" Margin="6,0,0,0" Background="Transparent" BorderThickness="0" Cursor="Hand"
+                            Foreground="{DynamicResource Muted}" ToolTip="Remove this date" Tag="{Binding Date}" Click="RemoveDate_Click"/>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+        <StackPanel x:Name="EndRow" Orientation="Horizontal" Margin="0,0,0,10">
+          <CheckBox x:Name="EndBox" Content="Ends on" VerticalAlignment="Center" Margin="0,0,10,0" Click="Changed"/>
+          <DatePicker x:Name="EndDatePicker" Width="190" SelectedDateChanged="Changed"/>
         </StackPanel>
 
         <TextBlock Style="{StaticResource SectionLabel}" Text="LABEL" Margin="0,10,0,8"/>
@@ -150,6 +209,20 @@
           </StackPanel>
         </WrapPanel>
         <CheckBox x:Name="WakeBox" Content="Wake the PC from sleep for this alarm" Margin="0,0,0,18"/>
+
+        <TextBlock Style="{StaticResource SectionLabel}" Text="WAKING UP"/>
+        <WrapPanel Margin="0,0,0,4">
+          <StackPanel Orientation="Horizontal" Margin="0,0,16,8">
+            <TextBlock Text="Challenge" VerticalAlignment="Center" Width="90"/>
+            <ComboBox x:Name="ChallengeBox" Width="210" SelectionChanged="Changed" ToolTip="Something to solve before Dismiss works (Snooze stays free)"/>
+          </StackPanel>
+          <ComboBox x:Name="LevelBox" Width="120" Margin="0,0,0,8" SelectionChanged="Changed">
+            <ComboBoxItem Content="Easy"/>
+            <ComboBoxItem Content="Normal"/>
+            <ComboBoxItem Content="Hard"/>
+          </ComboBox>
+        </WrapPanel>
+        <CheckBox x:Name="SpeakBox" Content="Say the time and label out loud when it rings" Margin="0,0,0,18"/>
 
         <TextBlock Style="{StaticResource SectionLabel}" Text="WHEN IT RINGS…"/>
         <Grid Margin="0,0,0,8">
